@@ -5,19 +5,28 @@
  */
 package tictactoe_project;
 
+import java.util.ArrayList;
 import java.util.Optional;
 import javafx.application.Application;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
@@ -30,58 +39,35 @@ import javafx.stage.Stage;
 
 public class Tictactoe_project extends Application {
     
+    Player p1=new Player();
+    Player p2=new Player();
+    int movesPlayer1[][]={{0,0,0},{0,0,0},{0,0,0}};
+    int movesPlayer2[][]={{0,0,0},{0,0,0},{0,0,0}};
     String text;
+    static int mode;
+    String s;
+    public int player=1;
     public boolean network_mode=false;
+    public int counter;
+    public int indx_x;
+    public int indx_y;
+    ArrayList <Button>btns;
     @Override
     public void start(Stage primaryStage) {
-
         
-         Button save= new Button();
-        save.setText("Save Game");
+        primaryStage.setTitle("Tictactoe");
+        primaryStage.setScene(startScene(primaryStage));
+        primaryStage.show();
+    }
+  
+    
+    private String getResource(String resourceName) {
+    return getClass().getResource(resourceName).toExternalForm();
+  }
+    Scene startScene(Stage primaryStage){
         
-       
         
-        save.setOnAction(new EventHandler<ActionEvent>() {
-            
-            @Override
-            public void handle(ActionEvent event) {
-                System.out.println("Welcome .... ");
-            }
-        });
-         
-        GridPane pane = new GridPane();
-        pane.setAlignment(Pos.CENTER);
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                    if(i==0)
-                        text ="http://icons.iconarchive.com/icons/danieledesantis/playstation-flat/128/playstation-cross-icon.png";
-                    else if(i==2)
-                        text="http://icons.iconarchive.com/icons/danieledesantis/playstation-flat/128/playstation-circle-icon.png";
-                    else
-                        
-                        text="https://cdn1.iconfinder.com/data/icons/navigation-elements/512/round-empty-circle-function-128.png";
-                   Button btn3=new Button("");
-                   btn3.setMinHeight(128);
-                    btn3.setMinWidth(128);
-                   btn3.setStyle("-fx-background-image: url('"+text+"')");
-                    pane.add(btn3, j, i);
-                   
-                    pane.getStyleClass().add("pane");
-                }
-                    
-           
-        }  
-        
-                pane.add(save,4,3);
-        
-                 
-                Scene scene = new Scene(pane, 700, 700);
-                 scene.getStylesheets().add(
-                getResource(
-                "tictactoe-style.css"
-              )
-            );
-         TextInputDialog textinput=new TextInputDialog();
+        TextInputDialog textinput=new TextInputDialog();
          textinput.setTitle("Player Name");
          textinput.setHeaderText("Please, Enter your Name:");
        
@@ -92,17 +78,13 @@ public class Tictactoe_project extends Application {
          withpc.setMinWidth(80);
          withpc.setStyle("-fx-font-size:25px;-fx-color:green;");
          
-          withpc.setOnAction(new EventHandler<ActionEvent>() {
-            
-            @Override
-            public void handle(ActionEvent event) {
-//                 textinput.setDialogPane();
-                Optional<String> playername = textinput.showAndWait();
-                if(playername.isPresent()) {
-                    System.out.println("Player name : "+playername.get());
-                    primaryStage.setScene(scene);
-                }
-            }
+          withpc.setOnAction((ActionEvent event) -> {
+              //                 textinput.setDialogPane();
+              Optional<String> playername = textinput.showAndWait();
+              if(playername.isPresent()) {
+                  System.out.println("Player name : "+playername.get());
+                  primaryStage.setScene(mainScene(primaryStage));
+              }
         });
           
          
@@ -135,61 +117,154 @@ public class Tictactoe_project extends Application {
          same_p2.setHeaderText("Please, Enter your Name:");
         
         
-        twoplayers.setOnAction(new EventHandler<ActionEvent>() {
+        twoplayers.setOnAction((ActionEvent event) -> {
+            if(group.getSelectedToggle() == same) {
+                network_mode=false;
+            }
+            else if(group.getSelectedToggle() == network){
+                network_mode=true;
+            }
             
-            @Override
-            public void handle(ActionEvent event) {
-                if(group.getSelectedToggle() == same) {
-                    network_mode=false;
-                }
-                else if(group.getSelectedToggle() == network){
-                    network_mode=true;
-                }
+            if(!network_mode){
                 
-                if(!network_mode){
-                      
-                     Optional<String> playername = same_p1.showAndWait();
+                Optional<String> playername = same_p1.showAndWait();
                 if(playername.isPresent()) {
                     System.out.println("Player1 name : "+playername.get());
                 }
-                  Optional<String> playername2 = same_p2.showAndWait();
+                Optional<String> playername2 = same_p2.showAndWait();
                 if(playername2.isPresent()) {
                     System.out.println("Player2 name : "+playername2.get());
                 }
-                }else{
-                    Optional<String> playername = clientinput.showAndWait();
+            }else{
+                Optional<String> playername = clientinput.showAndWait();
                 if(playername.isPresent()) {
                     System.out.println("Player name : "+playername.get());
                 }
-                   
                 
-                }
-               
-                 primaryStage.setScene(scene);
+                
             }
-        });
+            
+            primaryStage.setScene(mainScene(primaryStage));
+         });
+         GridPane paneRoot = new GridPane();
+        BorderPane bpaneRoot=new BorderPane();
+        MenuBar bar2=MyScenes.myMenuBar("Game",  new String[]{"Local","Machine","Network"});
          
-       
-        GridPane paneRoot = new GridPane();
+        bpaneRoot.setTop(bar2);
+        paneRoot.getStyleClass().add("paneRoot");
         paneRoot.setAlignment(Pos.CENTER);
         
-        paneRoot.add(withpc,7,1);
-        paneRoot.add(twoplayers,7,3);
+        paneRoot.add(withpc,5,1);
+        paneRoot.add(twoplayers,5,3);
         
-        paneRoot.add(same,7,4);
-        paneRoot.add(network,7,5);
+        paneRoot.add(same,5,5);
+        paneRoot.add(network,6,5);
+        paneRoot.setHgap(10);
+        paneRoot.setVgap(40);
+        bpaneRoot.setCenter(paneRoot);
           
-          Scene sceneRoot = new Scene(paneRoot, 700, 700); 
-          
-          
-        primaryStage.setTitle("Tictactoe");
-        primaryStage.setScene(sceneRoot);
-        primaryStage.show();
+          Scene sceneRoot = new Scene(bpaneRoot, 600, 600); 
+          return sceneRoot;
+    }
+    void Display(int [][]arr){
+    for(int[] pi : arr){
+                 String str = "";    
+                for(int i = 0; i < pi.length; i++){
+                    str= str + Integer.toString(pi[i]) + " ";
+                }//for
+                System.out.println(str);
+                }
     }
     
-    private String getResource(String resourceName) {
-    return getClass().getResource(resourceName).toExternalForm();
-  }
+     Scene mainScene(Stage primaryStage)
+         {
+             
+        
+        
+         BorderPane bpane=new BorderPane();
+        
+        MenuBar bar=MyScenes.myMenuBar("Game",  new String[]{"Local","Machine","Network"});
+        bpane.setTop(bar);
+         Button save= new Button();
+        save.setText("Save Game");
+        
+       
+        
+        save.setOnAction((ActionEvent event) -> {
+            System.out.println("Welcome .... ");
+         });
+          btns=new ArrayList<>();
+        GridPane pane = new GridPane();
+    
+        
+        pane.setAlignment(Pos.CENTER);
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                  Button btn3=new Button(""); 
+                   btn3.setMinHeight(128);
+                    btn3.setMinWidth(128);
+                   
+                   btns.add(btn3);
+                    pane.add(btn3, j, i);
+                    pane.getStyleClass().add("pane");
+                }
+                    
+           
+        }
+        for (int m = 0; m < btns.size(); m++) {
+            text="eo.png";
+            btns.get(m).setStyle("-fx-background-image: url('"+text+"')");
+            btns.get(m).setOnAction((ActionEvent e)->
+            {
+                 Button b=(Button)e.getSource();
+                indx_x=GridPane.getRowIndex(b);
+                indx_y=GridPane.getColumnIndex(b);
+                System.out.println("clicked");
+                                        // even
+                if(counter%2==0){
+                     System.out.println("even");
+                     
+                    s="X";
+                    text="x.png";
+                    player=1;
+                    movesPlayer1[indx_x][indx_y]=1;
+                     Display(movesPlayer1);
+                    text ="x.png";
+                }else{                  // odd
+                     System.out.println("odd");
+                    player=2;
+                    movesPlayer2[indx_x][indx_y]=2;
+                    s="O";
+                     Display(movesPlayer2);
+                    text="o.png";
+                }
+               
+//                System.out.println(counter);
+                b.setStyle("-fx-background-image: url('"+text+"')");
+                
+               
+//                System.out.println(indx_x+" "+indx_y);
+                System.out.println("\n");
+               
+                
+//                b.setText(s);
+                b.setDisable(true);
+                counter++;
+                    });  
+		}
+               
+                pane.add(save,2,3);
+                bpane.setCenter(pane);
+                 Scene scene = new Scene(bpane, 600, 600);
+                 scene.getStylesheets().add(
+                getResource(
+                "tictactoe-style.css"
+              )
+            );
+                 primaryStage.setScene(startScene(primaryStage));
+                 return scene;
+                 
+             }   
 
     /**
      * @param args the command line arguments
@@ -198,4 +273,59 @@ public class Tictactoe_project extends Application {
         launch(args);
     }
     
+}
+class MyScenes {
+    
+    static MenuBar myMenuBar(String menuName,String[] menuItemsNames)
+    {
+        
+        MenuBar Mbar = new MenuBar();
+        Menu menu=new Menu(menuName);
+        for (String menuItemsName : menuItemsNames) {
+            MenuItem mItem = new MenuItem(menuItemsName);
+            if(menuItemsName=="Local"){
+            mItem.setOnAction((ActionEvent e)->{
+            System.out.println("Local");
+            Tictactoe_project.mode=0;
+        });
+            }else if(menuItemsName=="Machine"){
+                mItem.setOnAction((ActionEvent e)->{
+            System.out.println("Machine");
+            Tictactoe_project.mode=1;
+        });
+            }else if(menuItemsName=="Network"){
+                mItem.setOnAction((ActionEvent e)->{
+                System.out.println("Network");
+                Tictactoe_project.mode=2;
+            
+            });
+            }
+            menu.getItems().add(mItem);
+        }
+              
+         Mbar.getMenus().add(menu);
+         return Mbar;
+         
+        
+    }
+}
+class Game{
+    
+    int gameId;
+    int winner_id;
+    String date;
+    
+    
+}
+class Player{
+    
+    int playerId;
+    String name;
+    char shape;
+    int is_win;
+    int mode;
+    
+    void moves(int[][] positions){
+        
+    }
 }
