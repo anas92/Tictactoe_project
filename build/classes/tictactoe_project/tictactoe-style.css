@@ -23,6 +23,12 @@ and open the template in the editor.
   -fx-hgap: 10px;
   -fx-vgap: 10px;
 }
+.paneRoot{
+    
+  -fx-border-width: 2px;
+  -fx-hgap: 20px;
+  -fx-vgap: 20px; 
+}
 .pane2{
     -fx-background-image: url("http://icons.iconarchive.com/icons/danieledesantis/playstation-flat/128/playstation-cross-icon.png");
             -fx-background-repeat: no-repeat;
