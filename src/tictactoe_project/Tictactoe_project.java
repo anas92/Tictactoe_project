@@ -5,15 +5,20 @@
  */
 package tictactoe_project;
 
+import com.sun.javafx.scene.control.skin.LabeledText;
 import java.util.ArrayList;
 import java.util.Optional;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
@@ -29,7 +34,9 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 /**
@@ -54,6 +61,8 @@ public class Tictactoe_project extends Application {
     ArrayList <Button>btns;
     @Override
     public void start(Stage primaryStage) {
+        
+        
         
         primaryStage.setTitle("Tictactoe");
         primaryStage.setScene(startScene(primaryStage));
@@ -82,6 +91,10 @@ public class Tictactoe_project extends Application {
               //                 textinput.setDialogPane();
               Optional<String> playername = textinput.showAndWait();
               if(playername.isPresent()) {
+                    p1.shape='x';
+                    p1.playerId=1;
+                    p1.mode=0;
+                    p1.name=playername.get();
                   System.out.println("Player name : "+playername.get());
                   primaryStage.setScene(mainScene(primaryStage));
               }
@@ -129,15 +142,27 @@ public class Tictactoe_project extends Application {
                 
                 Optional<String> playername = same_p1.showAndWait();
                 if(playername.isPresent()) {
+                    p1.shape='x';
+                    p1.playerId=1;
+                    p1.mode=1;
+                    p1.name=playername.get();
                     System.out.println("Player1 name : "+playername.get());
                 }
                 Optional<String> playername2 = same_p2.showAndWait();
                 if(playername2.isPresent()) {
+                    p2.shape='o';
+                    p2.playerId=2;
+                    p2.mode=1;
+                    p2.name=playername.get();
                     System.out.println("Player2 name : "+playername2.get());
                 }
             }else{
                 Optional<String> playername = clientinput.showAndWait();
                 if(playername.isPresent()) {
+                    p1.shape='x';
+                    p1.playerId=1;
+                    p1.mode=2;
+                    p1.name=playername.get();
                     System.out.println("Player name : "+playername.get());
                 }
                 
@@ -176,6 +201,7 @@ public class Tictactoe_project extends Application {
                 }
     }
     
+    @SuppressWarnings("empty-statement")
      Scene mainScene(Stage primaryStage)
          {
              
@@ -223,18 +249,19 @@ public class Tictactoe_project extends Application {
                                         // even
                 if(counter%2==0){
                      System.out.println("even");
-                     
                     s="X";
                     text="x.png";
                     player=1;
                     movesPlayer1[indx_x][indx_y]=1;
+                    p1.is_win=p1.moves(movesPlayer1);
                      Display(movesPlayer1);
                     text ="x.png";
                 }else{                  // odd
                      System.out.println("odd");
                     player=2;
-                    movesPlayer2[indx_x][indx_y]=2;
+                    movesPlayer2[indx_x][indx_y]=1;
                     s="O";
+                    p2.is_win=p2.moves(movesPlayer2);
                      Display(movesPlayer2);
                     text="o.png";
                 }
@@ -242,14 +269,50 @@ public class Tictactoe_project extends Application {
 //                System.out.println(counter);
                 b.setStyle("-fx-background-image: url('"+text+"')");
                 
-               
-//                System.out.println(indx_x+" "+indx_y);
                 System.out.println("\n");
+//                System.out.println(indx_x+" "+indx_y);
+                System.out.println(p1.is_win+" "+p2.is_win);
                
                 
 //                b.setText(s);
-                b.setDisable(true);
+                b.setCancelButton(true);
                 counter++;
+                if(p1.is_win==1){
+//                     primaryStage.initModality(Modality.WINDOW_MODAL);
+//                    VBox vbox = new VBox(new Text(p1.name+" Win"), new Button("Play Again"));
+//                    vbox.setAlignment(Pos.CENTER);
+//                    vbox.setPadding(new Insets(15));
+                    Alert alert = new Alert(AlertType.CONFIRMATION);
+                    alert.setTitle("Win");
+                    alert.setHeaderText(p1.name+" is Winner");
+                    alert.setContentText("Do you want play again ?");
+                    Optional sel=alert.showAndWait();
+                    if(sel.isPresent()){
+                         start(primaryStage);
+//                         movesPlayer1=null;
+//                         movesPlayer2=null;
+                    }else{
+                        Platform.exit();
+                    }
+                }else if(p2.is_win==1){
+//                    primaryStage.initModality(Modality.WINDOW_MODAL);
+//                    VBox vbox = new VBox(new Text(p2.name+" Win"), new Button("Play Again"));
+//                    vbox.setAlignment(Pos.CENTER);
+//                    vbox.setPadding(new Insets(15));
+//                    pane.add(vbox,1,1);
+                Alert alert = new Alert(AlertType.CONFIRMATION);
+                    alert.setTitle("Win");
+                  alert.setHeaderText(p2.name+" is Winner");
+                    alert.setContentText("Do you want play again ?");
+                    Optional sel=alert.showAndWait();
+                    if(sel.isPresent()){
+                        start(primaryStage);
+//                         movesPlayer1=null;
+//                         movesPlayer2=null;
+                    }else{
+                        Platform.exit();
+                    }
+                }
                     });  
 		}
                
@@ -325,7 +388,36 @@ class Player{
     int is_win;
     int mode;
     
-    void moves(int[][] positions){
+    int moves(int[][] positions){
+        System.out.println("ok");
+        int flag=1;
+        int flag2=1;
+     
+        // row
+        for (int i = 0; i < 3; i++) {
+            flag=1;
+            for (int j = 0; j < 3; j++) {
+                if(positions[i][j]==0 )
+                flag=0;
+            }
+            
+                if(flag==1)
+                 return 1;
+            
+        }
+        // column
+        for (int i = 0; i < 3; i++) {
+             flag2=1;
+            for (int j = 0; j < 3; j++) {
+                if(positions[j][i]==0 )
+                flag2=0;
+            }
+            if(flag2==1)
+                return 1;
+        }
+         if(((positions[0][0]==1 && positions[1][1]==1)&&positions[2][2]==1)||((positions[0][2]==1 && positions[1][1]==1)&&positions[2][0]==1))
+                return 1;
         
+            return 0;
     }
 }
