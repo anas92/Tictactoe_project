@@ -8,36 +8,41 @@ and open the template in the editor.
     Author     : anas
 */
 
-.root{
-    
+.root{ 
   /*-fx-background-color: midnightblue;*/
 /*  -fx-padding: 30px;*/
   -fx-font-size: 20px;
   -fx-font-family: "Comic Sans MS";
 }
 .pane{
-    
-   
    /*-fx-background-color: red;*/
    -fx-border-width: 2px;
   -fx-hgap: 10px;
   -fx-vgap: 10px;
 }
 .paneRoot{
-    
   -fx-border-width: 2px;
   -fx-hgap: 20px;
   -fx-vgap: 20px; 
 }
 .pane2{
-    -fx-background-image: url("http://icons.iconarchive.com/icons/danieledesantis/playstation-flat/128/playstation-cross-icon.png");
-            -fx-background-repeat: no-repeat;
-            -fx-background-size: contain;
+    -fx-background-repeat: no-repeat;
+    -fx-background-size: contain;
 }
 .imgView{
     -fx-arc-height: 200px;
     -fx-border-width: 10px;
-    
-    -fx-hgap: 10px;
+    -fx-border-radius: 200;
+   -fx-hgap: 10px;
   -fx-vgap: 10px;
 }
+
+.button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 200;
+}
+
+.b:disabled {
+  -fx-opacity: 1.0 ;
+}
+
