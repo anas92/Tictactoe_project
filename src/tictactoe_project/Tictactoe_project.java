@@ -4,10 +4,7 @@
  * and open the template in the editor.
  */
 package tictactoe_project;
-import java.awt.*;
-import java.util.*;
-import java.net.*;
-import java.io.*;
+
 import com.sun.javafx.scene.control.skin.LabeledText;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.ArrayList;
@@ -54,25 +51,11 @@ import javafx.stage.Stage;
  */
 
 public class Tictactoe_project extends Application {
-<<<<<<< HEAD
-    
-        public static void main(String[] args) {
-        new ServerSide();
-        launch(args);
-    }
-    
-    Player p1=new Player();
-    Player p2=new Player();
-    int movesPlayer1[][]={{0,0,0},{0,0,0},{0,0,0}};
-    int movesPlayer2[][]={{0,0,0},{0,0,0},{0,0,0}};
-    char gameBoard[][]={{'c','c','c'},{'c','c','c'},{'c','c','c'}};
-=======
     Game game;
     Player p1=new Player();
     Player p2=new Player();
     int movesPlayer1[][]= p1.movesPlayer;
     int movesPlayer2[][]= p2.movesPlayer;
->>>>>>> amirasbranch
     String text;
     static int mode;
     String s;
@@ -106,7 +89,7 @@ public class Tictactoe_project extends Application {
          withpc.setMinHeight(80);
          withpc.setMinWidth(80);
          withpc.setStyle("-fx-font-size:25px;-fx-color:green;");
-         // with pc option Button
+         
           withpc.setOnAction((ActionEvent event) -> {
               game =  new Game();
               game.mode = 0;
@@ -164,7 +147,7 @@ public class Tictactoe_project extends Application {
         same_p2.setTitle("Player2 Name");
         same_p2.setHeaderText("Please, Enter your Name:");
         
-        //two players locally "same machine"
+        
         twoplayers.setOnAction((ActionEvent event) -> {
             game = new Game();
             game.mode = 1;
@@ -268,35 +251,6 @@ public class Tictactoe_project extends Application {
         for (int m = 0; m < btns.size(); m++) {
             text="eo.png";
             btns.get(m).setStyle("-fx-background-image: url('"+text+"')");
-<<<<<<< HEAD
-            btns.get(m).setOnAction((ActionEvent e)->
-            {
-                 Button b=(Button)e.getSource();
-                indx_x=GridPane.getRowIndex(b);
-                indx_y=GridPane.getColumnIndex(b);
-                System.out.println("clicked");
-                                        // even
-                if(counter%2==0){
-                    
-                    movesPlayer1[indx_x][indx_y]=1;
-                    p1.is_win=p1.moves(movesPlayer1);
-                     Display(movesPlayer1);
-                    text ="x.png";
-                }else{                  // odd
-                     System.out.println("odd");
-                    player=2;
-                    movesPlayer2[indx_x][indx_y]=1;
-                    s="O";
-                    p2.is_win=p2.moves(movesPlayer2);
-                     Display(movesPlayer2);
-                    text="o.png";
-                }
-               
-//                System.out.println(counter);
-                b.setStyle("-fx-background-image: url('"+text+"')");
-                
-                System.out.println("\n");
-=======
             btns.get(m).setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent e) {
@@ -363,51 +317,10 @@ public class Tictactoe_project extends Application {
 //                System.out.println(counter);//
                   System.out.println("game mode: "+game.mode);
                   System.out.println("\n");
->>>>>>> amirasbranch
 //                System.out.println(indx_x+" "+indx_y);
                   System.out.println(p1.is_win+" "+p2.is_win);
 
 //                b.setText(s);
-<<<<<<< HEAD
-                b.setCancelButton(true);
-                counter++;
-                if(p1.is_win==1){
-//                     primaryStage.initModality(Modality.WINDOW_MODAL);
-//                    VBox vbox = new VBox(new Text(p1.name+" Win"), new Button("Play Again"));
-//                    vbox.setAlignment(Pos.CENTER);
-//                    vbox.setPadding(new Insets(15));
-                    Alert alert = new Alert(AlertType.CONFIRMATION);
-                    alert.setTitle("Win");
-                    alert.setHeaderText(p1.name+" is Winner");
-                    alert.setContentText("Do you want play again ?");
-                    Optional sel=alert.showAndWait();
-                    if(sel.isPresent()){
-                        
-                         start(primaryStage);
-//                         movesPlayer1=null;
-//                         movesPlayer2=null;
-                    }else{
-                        System.exit(1);
-                    }
-                }else if(p2.is_win==1){
-//                    primaryStage.initModality(Modality.WINDOW_MODAL);
-//                    VBox vbox = new VBox(new Text(p2.name+" Win"), new Button("Play Again"));
-//                    vbox.setAlignment(Pos.CENTER);
-//                    vbox.setPadding(new Insets(15));
-//                    pane.add(vbox,1,1);
-                Alert alert = new Alert(AlertType.CONFIRMATION);
-                    alert.setTitle("Win");
-                  alert.setHeaderText(p2.name+" is Winner");
-                    alert.setContentText("Do you want play again ?");
-                    Optional sel=alert.showAndWait();
-                    if(sel.isPresent()){
-                        start(primaryStage);
-//                         movesPlayer1=null;
-//                         movesPlayer2=null;
-                    }else{
-                        Platform.exit();
-                    }
-=======
 //                b.setCancelButton(true);
 if(p1.is_win==1){
     Alert alert = new Alert(AlertType.CONFIRMATION);
@@ -459,7 +372,6 @@ else if(counter == 9) {
         Platform.exit();
     }
 }
->>>>>>> amirasbranch
                 }
             });  
 		}
@@ -480,7 +392,9 @@ else if(counter == 9) {
     /**
      * @param args the command line arguments
      */
-
+    public static void main(String[] args) {
+        launch(args);
+    }
     
 }
 class MyScenes {
@@ -518,9 +432,6 @@ class MyScenes {
         
     }
 }
-<<<<<<< HEAD
-
-=======
 class Game{
     int gameId;
     int winner_id;
@@ -533,7 +444,6 @@ class Game{
     }
     
 }
->>>>>>> amirasbranch
 class Player{
     
     int playerId;
@@ -580,150 +490,4 @@ class Player{
         
             return 0;
     }
-}
-
-class Game{
-    
-    int gameId;
-    int winner_id;
-    int gameMode;
-    String date;
-    
-       static char moves(char[][] positions){
-        System.out.println("ok");
-        int flagRowX=0;
-        int flagRowO=0;
-        int flagColX=0;
-        int flagColO=0;
-     
-        // row
-        for (int i = 0; i < 3; i++) 
-        {
-            flagRowX=0;
-            for (int j = 0; j < 3; j++) {
-                if(positions[i][j]=='x' )
-                    flagRowX++;
-                else if(positions[i][j]=='o' )
-                    flagRowO++;
-                if(positions[i][j]=='x' )
-                    flagColX++;
-                else if(positions[i][j]=='o' )
-                    flagColO++;
-            }
-            
-                if(flagRowX==3)
-                 return 'x';
-                if(flagRowO==3)
-                 return 'o'; 
-                if(flagColX==3)
-                 return 'x';
-                if(flagColO==3)
-                 return 'o';   
-        }
-          if(((positions[0][0]=='x' && positions[1][1]==1)&&positions[2][2]=='x')||((positions[0][2]=='x' && positions[1][1]=='x')&&positions[2][0]=='x'))
-                return 'x';
-          if(((positions[0][0]=='0' && positions[1][1]==1)&&positions[2][2]=='0')||((positions[0][2]=='0' && positions[1][1]=='0')&&positions[2][0]=='0'))
-                return '0';
-        
-            return 'c';
-        // column
-//        for (int i = 0; i < 3; i++) 
-//        {
-//            flagColX=0;
-//            for (int j = 0; j < 3; j++) {
-//                if(positions[i][j]=='x' )
-//                    flagColX++;
-//                else if(positions[i][j]=='o' )
-//                    flagColO++;
-//            }
-//            
-//                if(flagColX==3)
-//                 return 'x';
-//                if(flagColO==3)
-//                 return 'o';          
-//        }
-       
-    }
-    
-}
-class ServerSide
-{
-  ServerSocket myServerSideSocket;
-  
-  public ServerSide()
-  {
-
-    try
-    {
-      myServerSideSocket = new ServerSocket(5005);
-      while(true)
-      {
-      Socket s = myServerSideSocket.accept();
-      new GameHandler(s);
-      }
-    }
-    catch(Exception e)
-    {
-      e.printStackTrace();
-    }
-
-  }
-}
-class GameHandler extends Thread
-{
-  DataInputStream dis;
-  PrintStream ps;
-  
-  static Vector<GameHandler> clientsVector =new Vector<GameHandler>();
-  public GameHandler(Socket cs)
-  {
-      try {
-        dis = new DataInputStream(cs.getInputStream());
-        ps = new PrintStream(cs.getOutputStream());
-        if(clientsVector.size()!=2)
-        {
-            clientsVector.add(this);
-            start();
-        }
-        else
-            ps.println("Tray Again Letar.....");
-        
-        
-      }
-      catch (Exception e) {
-          e.printStackTrace();
-      }
-
-  }
-  public void run()
-  {
-      while(true)
-      {
-          try{
-            String str = dis.readLine();
-            if(str==null)
-            {  //if client switched out..
-              clientsVector.remove(this);
-              break;
-            }
-            sendMessageToAll(str);
-          }
-          catch (Exception e) {
-            clientsVector.remove(this);
-            break;//e.printStackTrace();
-          }
-      }
-  }
-  void sendMessageToAll(String msg)
-  {
-      for(GameHandler ch : clientsVector)
-      {
-          try {
-            ch.ps.println(msg);
-          }
-          catch (Exception e) {
-              e.printStackTrace();
-          }
-      }
-  }
 }
