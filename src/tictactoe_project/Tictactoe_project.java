@@ -9,12 +9,15 @@ import java.util.*;
 import java.net.*;
 import java.io.*;
 import com.sun.javafx.scene.control.skin.LabeledText;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.stream.IntStream;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -23,6 +26,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -34,6 +38,8 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
@@ -48,6 +54,7 @@ import javafx.stage.Stage;
  */
 
 public class Tictactoe_project extends Application {
+<<<<<<< HEAD
     
         public static void main(String[] args) {
         new ServerSide();
@@ -59,20 +66,24 @@ public class Tictactoe_project extends Application {
     int movesPlayer1[][]={{0,0,0},{0,0,0},{0,0,0}};
     int movesPlayer2[][]={{0,0,0},{0,0,0},{0,0,0}};
     char gameBoard[][]={{'c','c','c'},{'c','c','c'},{'c','c','c'}};
+=======
+    Game game;
+    Player p1=new Player();
+    Player p2=new Player();
+    int movesPlayer1[][]= p1.movesPlayer;
+    int movesPlayer2[][]= p2.movesPlayer;
+>>>>>>> amirasbranch
     String text;
     static int mode;
     String s;
     public int player=1;
     public boolean network_mode=false;
-    public int counter;
+    public int counter = 0;
     public int indx_x;
     public int indx_y;
     ArrayList <Button>btns;
     @Override
     public void start(Stage primaryStage) {
-        
-        
-        
         primaryStage.setTitle("Tictactoe");
         primaryStage.setScene(startScene(primaryStage));
         primaryStage.show();
@@ -97,7 +108,8 @@ public class Tictactoe_project extends Application {
          withpc.setStyle("-fx-font-size:25px;-fx-color:green;");
          // with pc option Button
           withpc.setOnAction((ActionEvent event) -> {
-              //                 textinput.setDialogPane();
+              game =  new Game();
+              game.mode = 0;
               Optional<String> playername = textinput.showAndWait();
               if(playername.isPresent()) {
                     p1.shape='x';
@@ -105,8 +117,22 @@ public class Tictactoe_project extends Application {
                     p1.mode=0;
                     p1.name=playername.get();
                   System.out.println("Player name : "+playername.get());
+                  
+                   p2.shape='o';
+                   p2.playerId=0;
+                   p2.mode=0;
+                   p2.name="Computer";
+                   System.out.println("Player2 name : "+p2.name);
+                    
                   primaryStage.setScene(mainScene(primaryStage));
               }
+              
+              
+              
+              
+              
+              
+              
         });
           
          
@@ -130,16 +156,18 @@ public class Tictactoe_project extends Application {
         
         TextInputDialog clientinput=new TextInputDialog();
         clientinput.setTitle("Player Name");
-         clientinput.setHeaderText("Please, Enter your Name:");
+        clientinput.setHeaderText("Please, Enter your Name:");
         TextInputDialog same_p1=new TextInputDialog();
         same_p1.setTitle("Player1 Name");
-         same_p1.setHeaderText("Please, Enter your Name:");
+        same_p1.setHeaderText("Please, Enter your Name:");
         TextInputDialog same_p2=new TextInputDialog();
         same_p2.setTitle("Player2 Name");
-         same_p2.setHeaderText("Please, Enter your Name:");
+        same_p2.setHeaderText("Please, Enter your Name:");
         
         //two players locally "same machine"
         twoplayers.setOnAction((ActionEvent event) -> {
+            game = new Game();
+            game.mode = 1;
             if(group.getSelectedToggle() == same) {
                 network_mode=false;
             }
@@ -148,22 +176,21 @@ public class Tictactoe_project extends Application {
             }
             
             if(!network_mode){
-                
                 Optional<String> playername = same_p1.showAndWait();
                 if(playername.isPresent()) {
                     p1.shape='x';
                     p1.playerId=1;
                     p1.mode=1;
                     p1.name=playername.get();
-                    System.out.println("Player1 name : "+playername.get());
+                    System.out.println("Player1 name : "+p1.name);
                 }
                 Optional<String> playername2 = same_p2.showAndWait();
                 if(playername2.isPresent()) {
                     p2.shape='o';
                     p2.playerId=2;
                     p2.mode=1;
-                    p2.name=playername.get();
-                    System.out.println("Player2 name : "+playername2.get());
+                    p2.name=playername2.get();
+                    System.out.println("Player2 name : "+p2.name);
                 }
             }else{
                 Optional<String> playername = clientinput.showAndWait();
@@ -174,8 +201,6 @@ public class Tictactoe_project extends Application {
                     p1.name=playername.get();
                     System.out.println("Player name : "+playername.get());
                 }
-                
-                
             }
             
             primaryStage.setScene(mainScene(primaryStage));
@@ -197,12 +222,12 @@ public class Tictactoe_project extends Application {
         paneRoot.setVgap(40);
         bpaneRoot.setCenter(paneRoot);
           
-          Scene sceneRoot = new Scene(bpaneRoot, 600, 600); 
-          return sceneRoot;
+        Scene sceneRoot = new Scene(bpaneRoot, 600, 600); 
+        return sceneRoot;
     }
     void Display(int [][]arr){
     for(int[] pi : arr){
-                 String str = "";    
+                String str = "";    
                 for(int i = 0; i < pi.length; i++){
                     str= str + Integer.toString(pi[i]) + " ";
                 }//for
@@ -211,24 +236,20 @@ public class Tictactoe_project extends Application {
     }
     
     @SuppressWarnings("empty-statement")
-     Scene mainScene(Stage primaryStage)
-         {
-             
-        
-        
-         BorderPane bpane=new BorderPane();
+     Scene mainScene(Stage primaryStage) {
+        BorderPane bpane=new BorderPane();
         
         MenuBar bar=MyScenes.myMenuBar("Game",  new String[]{"Local","Machine","Network"});
         bpane.setTop(bar);
-         Button save= new Button();
+        Button save= new Button();
         save.setText("Save Game");
-        
-       
-        
+        save.setStyle("-fx-background-color: yellow;");
+//        save.setStyle("-fx-color: green;");
+  
         save.setOnAction((ActionEvent event) -> {
             System.out.println("Welcome .... ");
          });
-          btns=new ArrayList<>();
+        btns=new ArrayList<>();
         GridPane pane = new GridPane();
     
         
@@ -237,18 +258,17 @@ public class Tictactoe_project extends Application {
             for (int j = 0; j < 3; j++) {
                   Button btn3=new Button(""); 
                    btn3.setMinHeight(128);
-                    btn3.setMinWidth(128);
+                   btn3.setMinWidth(128);
                    
                    btns.add(btn3);
-                    pane.add(btn3, j, i);
-                    pane.getStyleClass().add("pane");
-                }
-                    
-           
+                   pane.add(btn3, j, i);
+                   pane.getStyleClass().add("pane");
+                }                       
         }
         for (int m = 0; m < btns.size(); m++) {
             text="eo.png";
             btns.get(m).setStyle("-fx-background-image: url('"+text+"')");
+<<<<<<< HEAD
             btns.get(m).setOnAction((ActionEvent e)->
             {
                  Button b=(Button)e.getSource();
@@ -276,11 +296,79 @@ public class Tictactoe_project extends Application {
                 b.setStyle("-fx-background-image: url('"+text+"')");
                 
                 System.out.println("\n");
+=======
+            btns.get(m).setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent e) {
+                    Button b=(Button)e.getSource();
+                    b.getStyleClass().add("b");
+                    indx_x=GridPane.getRowIndex(b);
+                    indx_y=GridPane.getColumnIndex(b);
+                    //System.out.println("clicked");
+                    
+                    if(counter%2==0){   // even
+                        System.out.println("even");
+                        s="X";
+                        text="x.png";
+                        player=1;
+                        movesPlayer1[indx_x][indx_y]=1;
+                        p1.is_win=p1.moves(movesPlayer1);
+                        Display(movesPlayer1);
+                        text ="x.png";
+                        b.setStyle("-fx-background-image: url('"+text+"');");
+                        b.setDisable(true);
+                        counter++;
+                        //computer's turn , player1 hasn'y won and game not over yet
+                        if(game.mode  == 0 && p1.is_win != 1 && counter < 9) {
+                            int randomNum = ThreadLocalRandom.current().nextInt(0, 8+1);
+                           
+                            System.out.println("Computer's turn...");
+                            System.out.println("Random move   : "+randomNum);
+                             
+                            Node target = btns.get(randomNum);
+                            
+                            while(target.isDisabled()) {
+                                System.out.println("Disabled");
+                                randomNum = ThreadLocalRandom.current().nextInt(0, 8+1);
+                                target = btns.get(randomNum);
+                                System.out.println("Random move   : "+randomNum);
+                            }
+                            player=2;
+                            movesPlayer2[randomNum/3][randomNum%3]=1;
+                            
+                            s="O";
+                            p2.is_win=p2.moves(movesPlayer2);
+                            Display(movesPlayer2);
+                            text="o.png";
+                            target.setDisable(true);    
+                            target.setStyle("-fx-opacity: 1.0 ;");
+                            target.setStyle("-fx-background-image: url('"+text+"');");
+                            counter++;                            
+                        }
+                    }else if(game.mode == 1) {      // odd 2players locally
+                        System.out.println("odd");
+                        player=2;
+                        movesPlayer2[indx_x][indx_y]=1;
+                        s="O";
+                        p2.is_win=p2.moves(movesPlayer2);
+                        Display(movesPlayer2);
+                        text="o.png";
+                        b.setStyle("-fx-background-image: url('"+text+"');");
+                        b.setDisable(true);
+                        counter++;
+                    }else if(game.mode == 0) {
+                        System.out.println("Computer's turn...");
+                    }
+                    
+//                System.out.println(counter);//
+                  System.out.println("game mode: "+game.mode);
+                  System.out.println("\n");
+>>>>>>> amirasbranch
 //                System.out.println(indx_x+" "+indx_y);
-                System.out.println(p1.is_win+" "+p2.is_win);
-               
-                
+                  System.out.println(p1.is_win+" "+p2.is_win);
+
 //                b.setText(s);
+<<<<<<< HEAD
                 b.setCancelButton(true);
                 counter++;
                 if(p1.is_win==1){
@@ -319,6 +407,59 @@ public class Tictactoe_project extends Application {
                     }else{
                         Platform.exit();
                     }
+=======
+//                b.setCancelButton(true);
+if(p1.is_win==1){
+    Alert alert = new Alert(AlertType.CONFIRMATION);
+    alert.setTitle("Win");
+    alert.setHeaderText(p1.name+" is Winner");
+    alert.setContentText("Do you want play again ?");
+    Optional<ButtonType> result = alert.showAndWait();
+    if (result.get() == ButtonType.OK){
+        p1 = new Player();
+        p2 = new Player();
+        movesPlayer1= p1.movesPlayer;
+        movesPlayer2= p2.movesPlayer;
+        counter = 0;
+        start(primaryStage);
+    }else{
+        Platform.exit();
+    }
+}else if(p2.is_win==1){
+    Alert alert = new Alert(AlertType.CONFIRMATION);
+    alert.setTitle("Win");
+    alert.setHeaderText(p2.name+" is Winner");
+    alert.setContentText("Do you want play again ?");
+    Optional<ButtonType> result = alert.showAndWait();
+    if (result.get() == ButtonType.OK){
+        p1 = new Player();
+        p2 = new Player();
+        movesPlayer1= p1.movesPlayer;
+        movesPlayer2= p2.movesPlayer;
+        counter = 0;
+        start(primaryStage);
+    }else{
+        Platform.exit();
+    }
+}
+else if(counter == 9) {
+    Alert alert = new Alert(AlertType.CONFIRMATION);
+    alert.setTitle("Tie");
+    alert.setHeaderText("It's a tie!");
+    alert.setContentText("Do you want play again ?");
+    Optional<ButtonType> result = alert.showAndWait();
+    if (result.get() == ButtonType.OK){
+        p1 = new Player();
+        p2 = new Player();
+        movesPlayer1= p1.movesPlayer;
+        movesPlayer2= p2.movesPlayer;
+        counter = 0;
+        start(primaryStage);
+    }else{
+        Platform.exit();
+    }
+}
+>>>>>>> amirasbranch
                 }
             });  
 		}
@@ -377,7 +518,22 @@ class MyScenes {
         
     }
 }
+<<<<<<< HEAD
 
+=======
+class Game{
+    int gameId;
+    int winner_id;
+    String date;
+    public int mode;
+    String[] Board = new String[9];
+
+    Game() {
+        
+    }
+    
+}
+>>>>>>> amirasbranch
 class Player{
     
     int playerId;
@@ -385,6 +541,12 @@ class Player{
     char shape;
     int is_win;
     int mode;
+    int movesPlayer[][]={{0,0,0},{0,0,0},{0,0,0}};
+
+    
+    Player() {
+ 
+    }
     
     int moves(int[][] positions){
         System.out.println("ok");
