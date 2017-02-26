@@ -74,23 +74,37 @@ public class Tictactoe_project extends Application implements Runnable{
     public int indx_x;
     public int indx_y;
     ArrayList <Button>btns;
+    Stage test;
+    Thread th;
+    String Pwinner;
     @Override
     public void start(Stage primaryStage) {
+        
+        test=primaryStage;
         primaryStage.setTitle("Tictactoe");
         primaryStage.setScene(startScene(primaryStage));
         primaryStage.show();
+//        th=new Thread(this);
+//                  th.start();
     }
     private String getResource(String resourceName) {
     return getClass().getResource(resourceName).toExternalForm();
   }
+    @Override
     public void run()
 	{
-//	
+	
             	try{		
 			while(true){	
                             System.out.println("run");
-
-                        char[] tempCahr =dis.readLine().toCharArray();
+                        String result= dis.readLine();  
+                        char[] tempCahr =result.toCharArray();
+                        if(tempCahr[0]=='@')
+                        {
+                            Pwinner=result.substring(1);
+                            showWinner(Pwinner);
+                        }
+                        
 
                             for (int i = 0; i < tempCahr.length; i++) {
                                 game.BoardChar[i]=tempCahr[i];
@@ -121,6 +135,12 @@ public class Tictactoe_project extends Application implements Runnable{
                                 }
                                 
                             }
+                          if(Game.moves(game.Board)==p1.shape)
+                          {
+                            p1.is_win=1;
+                            showWinner(Pwinner);
+
+                          }
                         
 			}
                         }catch(Exception ex)
@@ -156,10 +176,24 @@ public class Tictactoe_project extends Application implements Runnable{
                 }
     return str;
     }
+     void showWinner(String winner)
+     {
+          Alert alert = new Alert(AlertType.CONFIRMATION);
+                    alert.setTitle("Win");
+                    alert.setHeaderText(winner+" is Winner");
+                    alert.setContentText("Do you want play again ?");
+                    Optional<ButtonType> result = alert.showAndWait();
+                    if (result.get() == ButtonType.OK){
+                       reset();
+                       start(test);
+                    }else{
+                        Platform.exit();
+                    }
+     }
      // start scene when starting agame
     Scene startScene(Stage primaryStage){
         
-        
+        //test=primaryStage;
         TextInputDialog textinput=new TextInputDialog();
          textinput.setTitle("Player Name");
          textinput.setHeaderText("Please, Enter your Name:");
@@ -283,10 +317,12 @@ public class Tictactoe_project extends Application implements Runnable{
                     System.out.println(p1.shape);
                 }
                 // open socket and connect it to server
+                th=new Thread(this);
                 try{
 			s=new Socket(p1.serverIp,5005);
 			dis=new DataInputStream(s.getInputStream());
 			ps=new PrintStream(s.getOutputStream());
+                        th.start();
 		}catch(IOException ex)
 				{
 					ex.printStackTrace();
@@ -357,6 +393,7 @@ public class Tictactoe_project extends Application implements Runnable{
                  // Network board game is sent to server
               if(game.mode  == 2 && p1.is_win != 1){
                   System.out.println("enter");
+                   
                          if(p1.shape=='x'){
                         game.Board[indx_x][indx_y]='x';
                         text="x.png";
@@ -367,15 +404,16 @@ public class Tictactoe_project extends Application implements Runnable{
                         }
                          b.setStyle("-fx-background-image: url('"+text+"');");
                          b.setDisable(true);
+//                        System.out.println(DisplayCharArr(game.Board));
                         if(Game.moves(game.Board)==p1.shape)
                             p1.is_win=1;
-//                        System.out.println(DisplayCharArr(game.Board));
-                        
+//                       Thread th1=new Thread(this);
+//                        th1.start();
+                       //th.start();
                         ps.println(DisplayCharArr(game.Board));
-                        Thread th=new Thread(this);
-                        th.start();
+                        
                     }
-            else{
+              else if(p1.is_win != 1){
                 if(counter%2==0){   // even
                     System.out.println("even");
                     text="x.png";
@@ -434,32 +472,13 @@ public class Tictactoe_project extends Application implements Runnable{
                 System.out.println("\n");
                 System.out.println(p1.is_win+" "+p2.is_win);
                 
-                if(p1.is_win==1){
-//                    DisplayCharArr(game.Board);
-                    Alert alert = new Alert(AlertType.CONFIRMATION);
-                    alert.setTitle("Win");
-                    alert.setHeaderText(p1.name+" is Winner");
-                    alert.setContentText("Do you want play again ?");
-                    Optional<ButtonType> result = alert.showAndWait();
-                    if (result.get() == ButtonType.OK){
-                       reset();
-                        start(primaryStage);
-                    }else{
-                        Platform.exit();
-                    }
+                if(p1.is_win==1){ 
+                    if(game.mode==2)
+                           ps.println("@"+p1.name);
+                    showWinner(p1.name);
                 }else if(p2.is_win==1){
                      DisplayCharArr(game.Board);
-                    Alert alert = new Alert(AlertType.CONFIRMATION);
-                    alert.setTitle("Win");
-                    alert.setHeaderText(p2.name+" is Winner");
-                    alert.setContentText("Do you want play again ?");
-                    Optional<ButtonType> result = alert.showAndWait();
-                    if (result.get() == ButtonType.OK){
-                        reset();
-                        start(primaryStage);
-                    }else{
-                        Platform.exit();
-                    }
+                     showWinner(p2.name);
                 }
                 else if(counter == 9) {
                     Alert alert = new Alert(AlertType.CONFIRMATION);
