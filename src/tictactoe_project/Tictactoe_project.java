@@ -6,9 +6,15 @@
 package tictactoe_project;
 
 import com.sun.javafx.scene.control.skin.LabeledText;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.Vector;
 import java.util.stream.IntStream;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -50,15 +56,18 @@ import javafx.stage.Stage;
  * @author anas
  */
 
-public class Tictactoe_project extends Application {
+public class Tictactoe_project extends Application implements Runnable{
     Game game;
     Player p1=new Player();
     Player p2=new Player();
+    Socket s;
+    DataInputStream dis;
+    PrintStream ps;
     int movesPlayer1[][]= p1.movesPlayer;
     int movesPlayer2[][]= p2.movesPlayer;
+//    char BoardGame[][];
     String text;
     static int mode;
-    String s;
     public int player=1;
     public boolean network_mode=false;
     public int counter = 0;
@@ -71,11 +80,83 @@ public class Tictactoe_project extends Application {
         primaryStage.setScene(startScene(primaryStage));
         primaryStage.show();
     }
-  
-    
     private String getResource(String resourceName) {
     return getClass().getResource(resourceName).toExternalForm();
   }
+    public void run()
+	{
+//	
+            	try{		
+			while(true){	
+                            System.out.println("run");
+
+                        char[] tempCahr =dis.readLine().toCharArray();
+
+                            for (int i = 0; i < tempCahr.length; i++) {
+                                game.BoardChar[i]=tempCahr[i];
+                            }
+//                        
+                        game.Board[0][0]=tempCahr[0];
+                        game.Board[0][1]=tempCahr[1];
+                        game.Board[0][2]=tempCahr[2];
+                        game.Board[1][0]=tempCahr[3];
+                        game.Board[1][1]=tempCahr[4];
+                        game.Board[1][2]=tempCahr[5];
+                        game.Board[2][0]=tempCahr[6];
+                        game.Board[2][1]=tempCahr[7];
+                        game.Board[2][2]=tempCahr[8];
+                            DisplayCharArr(game.Board);
+
+                        for (int i = 0 ; i < 9; i++) {
+
+                                if(game.BoardChar[i]=='x')
+                                {
+                                    text="x.png";
+                                   ///Platform.
+                                    btns.get(i).setStyle("-fx-background-image: url('"+text+"')");
+                                }
+                                else if(game.BoardChar[i]=='o')
+                                {   text="o.png";
+                                 btns.get(i).setStyle("-fx-background-image: url('"+text+"')");
+                                }
+                                
+                            }
+                        
+			}
+                        }catch(Exception ex)
+			{
+				ex.printStackTrace();
+			}
+	}
+    // to reset players objects and counter when play again
+    void reset(){
+         p1 = new Player();
+         p2 = new Player();
+         movesPlayer1= p1.movesPlayer;
+         movesPlayer2= p2.movesPlayer;
+         counter = 0;
+    }
+    // to display board of every player as integer
+    void Display(int [][]arr){
+    for(int[] pi : arr){
+                String str = "";    
+                for(int i = 0; i < pi.length; i++){
+                    str= str + Integer.toString(pi[i]) + " ";
+                }//for
+                System.out.println(str);
+                }
+    }
+    // to display board game of players as string
+     String DisplayCharArr(char [][]arr){
+         String str = ""; 
+    for(char[] pi : arr){
+                for(int i = 0; i < pi.length; i++){
+                    str+=Character.toString(pi[i]);
+                }
+                }
+    return str;
+    }
+     // start scene when starting agame
     Scene startScene(Stage primaryStage){
         
         
@@ -109,17 +190,9 @@ public class Tictactoe_project extends Application {
                     
                   primaryStage.setScene(mainScene(primaryStage));
               }
-              
-              
-              
-              
-              
-              
-              
-        });
-          
-         
         
+        });
+   
         Button twoplayers= new Button();
         twoplayers.setText("Two Players");
         twoplayers.setMinHeight(80);
@@ -134,12 +207,17 @@ public class Tictactoe_project extends Application {
         
         RadioButton network=new RadioButton("Network");
         network.setToggleGroup(group);
-        
-        
-        
+        // dialogs of network
         TextInputDialog clientinput=new TextInputDialog();
         clientinput.setTitle("Player Name");
         clientinput.setHeaderText("Please, Enter your Name:");
+        TextInputDialog serverinput=new TextInputDialog();
+        serverinput.setTitle("Server IP");
+        serverinput.setHeaderText("Please, Enter IP of Server:");
+        TextInputDialog shapeClient=new TextInputDialog();
+        shapeClient.setTitle("Shape Type:");
+        shapeClient.setHeaderText("Choose x or o to start");
+        // dialog of locally machine
         TextInputDialog same_p1=new TextInputDialog();
         same_p1.setTitle("Player1 Name");
         same_p1.setHeaderText("Please, Enter your Name:");
@@ -149,8 +227,7 @@ public class Tictactoe_project extends Application {
         
         
         twoplayers.setOnAction((ActionEvent event) -> {
-            game = new Game();
-            game.mode = 1;
+            
             if(group.getSelectedToggle() == same) {
                 network_mode=false;
             }
@@ -158,7 +235,10 @@ public class Tictactoe_project extends Application {
                 network_mode=true;
             }
             
+            // tow players locally
             if(!network_mode){
+                game = new Game();
+                game.mode = 1;
                 Optional<String> playername = same_p1.showAndWait();
                 if(playername.isPresent()) {
                     p1.shape='x';
@@ -175,15 +255,42 @@ public class Tictactoe_project extends Application {
                     p2.name=playername2.get();
                     System.out.println("Player2 name : "+p2.name);
                 }
+                
             }else{
+                // network mode
+                game = new Game();
+                game.mode = 2;
                 Optional<String> playername = clientinput.showAndWait();
                 if(playername.isPresent()) {
-                    p1.shape='x';
+                    // run server to listen to clients 
+                  // ServerSide server= new ServerSide();
+                   
+                   game.mode=2;
                     p1.playerId=1;
-                    p1.mode=2;
+                    p1.mode=1;
                     p1.name=playername.get();
                     System.out.println("Player name : "+playername.get());
                 }
+                Optional<String> serverip =serverinput.showAndWait();
+                if(serverip.isPresent()) {
+                    p1.serverIp=serverip.get();
+                    System.out.println(p1.serverIp);
+                }
+                 Optional<String> shapeType =shapeClient.showAndWait();
+                if(shapeType.isPresent()) {
+                    char[]chArr=shapeType.get().toCharArray();
+                    p1.shape=chArr[0];
+                    System.out.println(p1.shape);
+                }
+                // open socket and connect it to server
+                try{
+			s=new Socket(p1.serverIp,5005);
+			dis=new DataInputStream(s.getInputStream());
+			ps=new PrintStream(s.getOutputStream());
+		}catch(IOException ex)
+				{
+					ex.printStackTrace();
+				}
             }
             
             primaryStage.setScene(mainScene(primaryStage));
@@ -208,17 +315,7 @@ public class Tictactoe_project extends Application {
         Scene sceneRoot = new Scene(bpaneRoot, 600, 600); 
         return sceneRoot;
     }
-    void Display(int [][]arr){
-    for(int[] pi : arr){
-                String str = "";    
-                for(int i = 0; i < pi.length; i++){
-                    str= str + Integer.toString(pi[i]) + " ";
-                }//for
-                System.out.println(str);
-                }
-    }
-    
-    @SuppressWarnings("empty-statement")
+    // main scene when choose between game modes
      Scene mainScene(Stage primaryStage) {
         BorderPane bpane=new BorderPane();
         
@@ -251,128 +348,136 @@ public class Tictactoe_project extends Application {
         for (int m = 0; m < btns.size(); m++) {
             text="eo.png";
             btns.get(m).setStyle("-fx-background-image: url('"+text+"')");
-            btns.get(m).setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent e) {
-                    Button b=(Button)e.getSource();
-                    b.getStyleClass().add("b");
-                    indx_x=GridPane.getRowIndex(b);
-                    indx_y=GridPane.getColumnIndex(b);
-                    //System.out.println("clicked");
-                    
-                    if(counter%2==0){   // even
-                        System.out.println("even");
-                        s="X";
+            btns.get(m).setOnAction((ActionEvent e) -> 
+            {
+                Button b=(Button)e.getSource();
+                b.getStyleClass().add("b");
+                indx_x=GridPane.getRowIndex(b);
+                indx_y=GridPane.getColumnIndex(b);
+                 // Network board game is sent to server
+              if(game.mode  == 2 && p1.is_win != 1){
+                  System.out.println("enter");
+                         if(p1.shape=='x'){
+                        game.Board[indx_x][indx_y]='x';
                         text="x.png";
-                        player=1;
-                        movesPlayer1[indx_x][indx_y]=1;
-                        p1.is_win=p1.moves(movesPlayer1);
-                        Display(movesPlayer1);
-                        text ="x.png";
-                        b.setStyle("-fx-background-image: url('"+text+"');");
-                        b.setDisable(true);
-                        counter++;
-                        //computer's turn , player1 hasn'y won and game not over yet
-                        if(game.mode  == 0 && p1.is_win != 1 && counter < 9) {
-                            int randomNum = ThreadLocalRandom.current().nextInt(0, 8+1);
-                           
-                            System.out.println("Computer's turn...");
-                            System.out.println("Random move   : "+randomNum);
-                             
-                            Node target = btns.get(randomNum);
-                            
-                            while(target.isDisabled()) {
-                                System.out.println("Disabled");
-                                randomNum = ThreadLocalRandom.current().nextInt(0, 8+1);
-                                target = btns.get(randomNum);
-                                System.out.println("Random move   : "+randomNum);
-                            }
-                            player=2;
-                            movesPlayer2[randomNum/3][randomNum%3]=1;
-                            
-                            s="O";
-                            p2.is_win=p2.moves(movesPlayer2);
-                            Display(movesPlayer2);
-                            text="o.png";
-                            target.setDisable(true);    
-                            target.setStyle("-fx-opacity: 1.0 ;");
-                            target.setStyle("-fx-background-image: url('"+text+"');");
-                            counter++;                            
+                         }
+                        else if(p1.shape=='o'){
+                        game.Board[indx_x][indx_y]='o';
+                        text="o.png";
                         }
-                    }else if(game.mode == 1) {      // odd 2players locally
-                        System.out.println("odd");
+                         b.setStyle("-fx-background-image: url('"+text+"');");
+                         b.setDisable(true);
+                        if(Game.moves(game.Board)==p1.shape)
+                            p1.is_win=1;
+//                        System.out.println(DisplayCharArr(game.Board));
+                        
+                        ps.println(DisplayCharArr(game.Board));
+                        Thread th=new Thread(this);
+                        th.start();
+                    }
+            else{
+                if(counter%2==0){   // even
+                    System.out.println("even");
+                    text="x.png";
+                    player=1;
+                    movesPlayer1[indx_x][indx_y]=1;
+                    p1.is_win=p1.moves(movesPlayer1);
+                    Display(movesPlayer1);
+                    text ="x.png";
+                    b.setStyle("-fx-background-image: url('"+text+"');");
+                    b.setDisable(true);
+                    counter++;
+                   
+                    //computer's turn , player1 hasn'y won and game not over yet
+                    if(game.mode  == 0 && p1.is_win != 1 && counter < 9) {
+                        int randomNum = ThreadLocalRandom.current().nextInt(0, 8+1);
+                        
+                        System.out.println("Computer's turn...");
+                        System.out.println("Random move   : "+randomNum);
+                        
+                        Node target = btns.get(randomNum);
+                        
+                        while(target.isDisabled()) {
+                            System.out.println("Disabled");
+                            randomNum = ThreadLocalRandom.current().nextInt(0, 8+1);
+                            target = btns.get(randomNum);
+                            System.out.println("Random move   : "+randomNum);
+                        }
                         player=2;
-                        movesPlayer2[indx_x][indx_y]=1;
-                        s="O";
+                        movesPlayer2[randomNum/3][randomNum%3]=1;
                         p2.is_win=p2.moves(movesPlayer2);
                         Display(movesPlayer2);
                         text="o.png";
-                        b.setStyle("-fx-background-image: url('"+text+"');");
-                        b.setDisable(true);
+                        target.setDisable(true);
+                        target.setStyle("-fx-opacity: 1.0 ;");
+                        target.setStyle("-fx-background-image: url('"+text+"');");
                         counter++;
-                    }else if(game.mode == 0) {
-                        System.out.println("Computer's turn...");
                     }
-                    
-//                System.out.println(counter);//
-                  System.out.println("game mode: "+game.mode);
-                  System.out.println("\n");
-//                System.out.println(indx_x+" "+indx_y);
-                  System.out.println(p1.is_win+" "+p2.is_win);
-
-//                b.setText(s);
-//                b.setCancelButton(true);
-if(p1.is_win==1){
-    Alert alert = new Alert(AlertType.CONFIRMATION);
-    alert.setTitle("Win");
-    alert.setHeaderText(p1.name+" is Winner");
-    alert.setContentText("Do you want play again ?");
-    Optional<ButtonType> result = alert.showAndWait();
-    if (result.get() == ButtonType.OK){
-        p1 = new Player();
-        p2 = new Player();
-        movesPlayer1= p1.movesPlayer;
-        movesPlayer2= p2.movesPlayer;
-        counter = 0;
-        start(primaryStage);
-    }else{
-        Platform.exit();
-    }
-}else if(p2.is_win==1){
-    Alert alert = new Alert(AlertType.CONFIRMATION);
-    alert.setTitle("Win");
-    alert.setHeaderText(p2.name+" is Winner");
-    alert.setContentText("Do you want play again ?");
-    Optional<ButtonType> result = alert.showAndWait();
-    if (result.get() == ButtonType.OK){
-        p1 = new Player();
-        p2 = new Player();
-        movesPlayer1= p1.movesPlayer;
-        movesPlayer2= p2.movesPlayer;
-        counter = 0;
-        start(primaryStage);
-    }else{
-        Platform.exit();
-    }
-}
-else if(counter == 9) {
-    Alert alert = new Alert(AlertType.CONFIRMATION);
-    alert.setTitle("Tie");
-    alert.setHeaderText("It's a tie!");
-    alert.setContentText("Do you want play again ?");
-    Optional<ButtonType> result = alert.showAndWait();
-    if (result.get() == ButtonType.OK){
-        p1 = new Player();
-        p2 = new Player();
-        movesPlayer1= p1.movesPlayer;
-        movesPlayer2= p2.movesPlayer;
-        counter = 0;
-        start(primaryStage);
-    }else{
-        Platform.exit();
-    }
-}
+                }else if(game.mode == 1) {      // odd 2players locally
+                    System.out.println("odd");
+                    player=2;
+                    game.Board[indx_x][indx_y]='o';
+                    movesPlayer2[indx_x][indx_y]=1;
+                    p2.is_win=p2.moves(movesPlayer2);
+                    Display(movesPlayer2);
+                    text="o.png";
+                    b.setStyle("-fx-background-image: url('"+text+"');");
+                    b.setDisable(true);
+                    counter++;
+                }else if(game.mode == 0) {
+                    System.out.println("Computer's turn...");
                 }
+              }
+            
+                
+                System.out.println("game mode: "+game.mode);
+                System.out.println("\n");
+                System.out.println(p1.is_win+" "+p2.is_win);
+                
+                if(p1.is_win==1){
+//                    DisplayCharArr(game.Board);
+                    Alert alert = new Alert(AlertType.CONFIRMATION);
+                    alert.setTitle("Win");
+                    alert.setHeaderText(p1.name+" is Winner");
+                    alert.setContentText("Do you want play again ?");
+                    Optional<ButtonType> result = alert.showAndWait();
+                    if (result.get() == ButtonType.OK){
+                       reset();
+                        start(primaryStage);
+                    }else{
+                        Platform.exit();
+                    }
+                }else if(p2.is_win==1){
+                     DisplayCharArr(game.Board);
+                    Alert alert = new Alert(AlertType.CONFIRMATION);
+                    alert.setTitle("Win");
+                    alert.setHeaderText(p2.name+" is Winner");
+                    alert.setContentText("Do you want play again ?");
+                    Optional<ButtonType> result = alert.showAndWait();
+                    if (result.get() == ButtonType.OK){
+                        reset();
+                        start(primaryStage);
+                    }else{
+                        Platform.exit();
+                    }
+                }
+                else if(counter == 9) {
+                    Alert alert = new Alert(AlertType.CONFIRMATION);
+                    alert.setTitle("Tie");
+                    alert.setHeaderText("It's a tie!");
+                    alert.setContentText("Do you want play again ?");
+                    Optional<ButtonType> result = alert.showAndWait();
+                    if (result.get() == ButtonType.OK){
+                        p1 = new Player();
+                        p2 = new Player();
+                        movesPlayer1= p1.movesPlayer;
+                        movesPlayer2= p2.movesPlayer;
+                        counter = 0;
+                        start(primaryStage);
+                    }else{
+                        Platform.exit();
+                    }
+                }           
             });  
 		}
                
@@ -437,17 +542,75 @@ class Game{
     int winner_id;
     String date;
     public int mode;
-    String[] Board = new String[9];
+    char BoardChar[]={'c','c','c','c','c','c','c','c','c'};
+    char Board[][]={{'c','c','c'},{'c','c','c'},{'c','c','c'}};
 
     Game() {
         
     }
+    
+    static char moves(char[][] positions){
+        System.out.println("ok");
+        int flagRowX=0;
+        int flagRowO=0;
+        int flagColX=0;
+        int flagColO=0;
+     
+        // row 
+        for (int i = 0; i < 3; i++) 
+        {
+            flagRowX=0;
+            flagRowO=0;
+            for (int j = 0; j < 3; j++) {
+                if(positions[i][j]=='x' )
+                    flagRowX++;
+                else if(positions[i][j]=='o' )
+                    flagRowO++;
+
+            }
+            
+                if(flagRowX==3)
+                 return 'x';
+                if(flagRowO==3)
+                 return 'o'; 
+   
+        }
+        
+         // column
+        for (int i = 0; i < 3; i++) 
+        {
+            flagColX=0;
+            flagColO=0;
+            for (int j = 0; j < 3; j++) {
+                if(positions[j][i]=='x' )
+                    flagColX++;
+                else if(positions[j][i]=='o' )
+                    flagColO++;
+            }
+            
+                if(flagColX==3)
+                 return 'x';
+                if(flagColO==3)
+                 return 'o';          
+        }
+        
+          if(((positions[0][0]=='x' && positions[1][1]==1)&&positions[2][2]=='x')||((positions[0][2]=='x' && positions[1][1]=='x')&&positions[2][0]=='x'))
+                return 'x';
+          if(((positions[0][0]=='0' && positions[1][1]==1)&&positions[2][2]=='0')||((positions[0][2]=='0' && positions[1][1]=='0')&&positions[2][0]=='0'))
+                return '0';
+        
+          
+          
+            return 'c';  
+    }
+     
     
 }
 class Player{
     
     int playerId;
     String name;
+    String serverIp;
     char shape;
     int is_win;
     int mode;
