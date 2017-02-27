@@ -65,7 +65,8 @@ public class Tictactoe_project extends Application implements Runnable{
     PrintStream ps;
     int movesPlayer1[][]= p1.movesPlayer;
     int movesPlayer2[][]= p2.movesPlayer;
-//    char BoardGame[][];
+    boolean switchFlag=true;
+    int countVS=0;
     String text;
     static int mode;
     public int player=1;
@@ -82,7 +83,7 @@ public class Tictactoe_project extends Application implements Runnable{
         
         test=primaryStage;
         primaryStage.setTitle("Tictactoe");
-        primaryStage.setScene(startScene(primaryStage));
+        primaryStage.setScene(firstScene(primaryStage));
         primaryStage.show();
 //        th=new Thread(this);
 //                  th.start();
@@ -97,19 +98,33 @@ public class Tictactoe_project extends Application implements Runnable{
             	try{		
 			while(true){	
                             System.out.println("run");
-                        String result= dis.readLine();  
+                        String result= dis.readLine();
                         char[] tempCahr =result.toCharArray();
                         if(tempCahr[0]=='@')
-                        {
+                        {  
                             Pwinner=result.substring(1);
                             showWinner(Pwinner);
+    
                         }
-                        
+                        else if(tempCahr.length==9)
+                        {
 
                             for (int i = 0; i < tempCahr.length; i++) {
+//                                if(tempCahr[i]!='c')
+//                                {
+//                                    if(tempCahr[i]==p1.shape)
+//                                        p1.countShape++;
+//                                    else
+//                                        countVS++;
+//                                    
+//                                }
                                 game.BoardChar[i]=tempCahr[i];
+                                
                             }
-//                        
+//                        if(p1.countShape<=countVS)
+//                        {
+//                            switchFlag=true;
+//                        }
                         game.Board[0][0]=tempCahr[0];
                         game.Board[0][1]=tempCahr[1];
                         game.Board[0][2]=tempCahr[2];
@@ -135,14 +150,18 @@ public class Tictactoe_project extends Application implements Runnable{
                                 }
                                 
                             }
+                       // }
                           if(Game.moves(game.Board)==p1.shape)
                           {
                             p1.is_win=1;
-                            showWinner(Pwinner);
+                            //showWinner(Pwinner);
 
                           }
+                        }
                         
-			}
+                        }
+        //	}
+                        
                         }catch(Exception ex)
 			{
 				ex.printStackTrace();
@@ -155,6 +174,9 @@ public class Tictactoe_project extends Application implements Runnable{
          movesPlayer1= p1.movesPlayer;
          movesPlayer2= p2.movesPlayer;
          counter = 0;
+         game=new Game();
+         btns=new ArrayList<>();
+         
     }
     // to display board of every player as integer
     void Display(int [][]arr){
@@ -162,7 +184,7 @@ public class Tictactoe_project extends Application implements Runnable{
                 String str = "";    
                 for(int i = 0; i < pi.length; i++){
                     str= str + Integer.toString(pi[i]) + " ";
-                }//for
+                }
                 System.out.println(str);
                 }
     }
@@ -178,26 +200,31 @@ public class Tictactoe_project extends Application implements Runnable{
     }
      void showWinner(String winner)
      {
+         Platform.runLater(()->{
           Alert alert = new Alert(AlertType.CONFIRMATION);
                     alert.setTitle("Win");
                     alert.setHeaderText(winner+" is Winner");
-                    alert.setContentText("Do you want play again ?");
+                    alert.setContentText("Do you want play again ?"); 
                     Optional<ButtonType> result = alert.showAndWait();
                     if (result.get() == ButtonType.OK){
-                       reset();
-                       start(test);
+                       //reset();
+                       //start(test);
+                       game=new Game();
+                       game.mode=2;
+                       mainScene(test);
                     }else{
                         Platform.exit();
                     }
+                    });
+
      }
      // start scene when starting agame
-    Scene startScene(Stage primaryStage){
+    Scene firstScene(Stage stage){
         
-        //test=primaryStage;
+        //test=stage;
         TextInputDialog textinput=new TextInputDialog();
          textinput.setTitle("Player Name");
-         textinput.setHeaderText("Please, Enter your Name:");
-       
+         textinput.setHeaderText("Please, Enter your Name:");    
          
          Button withpc= new Button();
          withpc.setText("Play with PC");
@@ -222,7 +249,7 @@ public class Tictactoe_project extends Application implements Runnable{
                    p2.name="Computer";
                    System.out.println("Player2 name : "+p2.name);
                     
-                  primaryStage.setScene(mainScene(primaryStage));
+                  stage.setScene(mainScene(stage));
               }
         
         });
@@ -237,7 +264,6 @@ public class Tictactoe_project extends Application implements Runnable{
         RadioButton same=new RadioButton("Same Machine");
         same.setToggleGroup(group);
         same.setStyle("-fx-hgap: 10px;-fx-vgap: 10px;");
-        
         
         RadioButton network=new RadioButton("Network");
         network.setToggleGroup(group);
@@ -329,7 +355,7 @@ public class Tictactoe_project extends Application implements Runnable{
 				}
             }
             
-            primaryStage.setScene(mainScene(primaryStage));
+            stage.setScene(mainScene(stage));
          });
          GridPane paneRoot = new GridPane();
         BorderPane bpaneRoot=new BorderPane();
@@ -352,7 +378,7 @@ public class Tictactoe_project extends Application implements Runnable{
         return sceneRoot;
     }
     // main scene when choose between game modes
-     Scene mainScene(Stage primaryStage) {
+     Scene mainScene(Stage stage) {
         BorderPane bpane=new BorderPane();
         
         MenuBar bar=MyScenes.myMenuBar("Game",  new String[]{"Local","Machine","Network"});
@@ -364,7 +390,7 @@ public class Tictactoe_project extends Application implements Runnable{
   
         save.setOnAction((ActionEvent event) -> {
             System.out.println("Welcome .... ");
-         });
+        });
         btns=new ArrayList<>();
         GridPane pane = new GridPane();
     
@@ -372,12 +398,12 @@ public class Tictactoe_project extends Application implements Runnable{
         pane.setAlignment(Pos.CENTER);
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                  Button btn3=new Button(""); 
-                   btn3.setMinHeight(128);
-                   btn3.setMinWidth(128);
+                  Button btnGame=new Button(""); 
+                   btnGame.setMinHeight(128);
+                   btnGame.setMinWidth(128);
                    
-                   btns.add(btn3);
-                   pane.add(btn3, j, i);
+                   btns.add(btnGame);
+                   pane.add(btnGame, j, i);
                    pane.getStyleClass().add("pane");
                 }                       
         }
@@ -390,8 +416,8 @@ public class Tictactoe_project extends Application implements Runnable{
                 b.getStyleClass().add("b");
                 indx_x=GridPane.getRowIndex(b);
                 indx_y=GridPane.getColumnIndex(b);
-                 // Network board game is sent to server
-              if(game.mode  == 2 && p1.is_win != 1){
+            // Network board game is sent to server
+              if(game.mode  == 2 && p1.is_win != 1){ //&& switchFlag==true){
                   System.out.println("enter");
                    
                          if(p1.shape=='x'){
@@ -407,10 +433,8 @@ public class Tictactoe_project extends Application implements Runnable{
 //                        System.out.println(DisplayCharArr(game.Board));
                         if(Game.moves(game.Board)==p1.shape)
                             p1.is_win=1;
-//                       Thread th1=new Thread(this);
-//                        th1.start();
-                       //th.start();
                         ps.println(DisplayCharArr(game.Board));
+                        //switchFlag=false;
                         
                     }
               else if(p1.is_win != 1){
@@ -474,8 +498,9 @@ public class Tictactoe_project extends Application implements Runnable{
                 
                 if(p1.is_win==1){ 
                     if(game.mode==2)
-                           ps.println("@"+p1.name);
-                    showWinner(p1.name);
+                        ps.println("@"+p1.name);
+                    else
+                        showWinner(p1.name);
                 }else if(p2.is_win==1){
                      DisplayCharArr(game.Board);
                      showWinner(p2.name);
@@ -492,7 +517,7 @@ public class Tictactoe_project extends Application implements Runnable{
                         movesPlayer1= p1.movesPlayer;
                         movesPlayer2= p2.movesPlayer;
                         counter = 0;
-                        start(primaryStage);
+                        start(stage);
                     }else{
                         Platform.exit();
                     }
@@ -508,7 +533,7 @@ public class Tictactoe_project extends Application implements Runnable{
                 "tictactoe-style.css"
               )
             );
-                 primaryStage.setScene(startScene(primaryStage));
+                 stage.setScene(firstScene(stage));
                  return scene;
                  
              }   
@@ -613,9 +638,9 @@ class Game{
                  return 'o';          
         }
         
-          if(((positions[0][0]=='x' && positions[1][1]==1)&&positions[2][2]=='x')||((positions[0][2]=='x' && positions[1][1]=='x')&&positions[2][0]=='x'))
+          if(((positions[0][0]=='x' && positions[1][1]=='x')&&positions[2][2]=='x')||((positions[0][2]=='x' && positions[1][1]=='x')&&positions[2][0]=='x'))
                 return 'x';
-          if(((positions[0][0]=='0' && positions[1][1]==1)&&positions[2][2]=='0')||((positions[0][2]=='0' && positions[1][1]=='0')&&positions[2][0]=='0'))
+          if(((positions[0][0]=='0' && positions[1][1]=='o')&&positions[2][2]=='0')||((positions[0][2]=='0' && positions[1][1]=='0')&&positions[2][0]=='0'))
                 return '0';
         
           
@@ -630,6 +655,7 @@ class Player{
     int playerId;
     String name;
     String serverIp;
+    int countShape=0;
     char shape;
     int is_win;
     int mode;
