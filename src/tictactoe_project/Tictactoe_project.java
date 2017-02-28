@@ -514,6 +514,8 @@ public class Tictactoe_project extends Application implements Runnable{
                         if(Game.moves(game.Board)==p1.shape)
                             p1.is_win=1;
                         ps.println(DisplayCharArr(game.Board));
+//                        int currentPoss=(indx_x*3)+indx_y;
+//                        myDB.insertStep(maxGameId, p1.playerId, currentPoss);
                         //switchFlag=false;
                     }
                     else if(game.mode==0) { // play with computer game
