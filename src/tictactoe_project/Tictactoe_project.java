@@ -77,7 +77,6 @@ public class Tictactoe_project extends Application implements Runnable{
     PrintStream ps;
     int movesPlayer1[][]= p1.movesPlayer;
     int movesPlayer2[][]= p2.movesPlayer;
-//    char BoardGame[][];
     int countVS=0;
     String text;
     static int mode;
@@ -87,13 +86,15 @@ public class Tictactoe_project extends Application implements Runnable{
     public int indx_x;
     public int indx_y;
     public static ArrayList <Button>btns;
+    int maxGameId;
     Stage test;
     String Pwinner;
     Thread th;
     Boolean switchFlag=true;
-  
+    dbConnection myDB;
     @Override
     public void start(Stage primaryStage) {
+        
         
         test=primaryStage;
         primaryStage.setTitle("Tictactoe");
@@ -236,6 +237,7 @@ public class Tictactoe_project extends Application implements Runnable{
     Scene firstScene(Stage stage){
         
         //test=stage;
+        myDB=new dbConnection();
         TextInputDialog textinput=new TextInputDialog();
          textinput.setTitle("Player Name");
          textinput.setHeaderText("Please, Enter your Name:");
@@ -263,6 +265,8 @@ public class Tictactoe_project extends Application implements Runnable{
           withpc.setOnAction((ActionEvent event) -> {
               game =  new Game();
               game.mode = 0;
+              myDB.insertGame(game.mode);
+              maxGameId=myDB.getMaxGameId();
               boardAI = new BoardAI();
               rand = new Random();
         
@@ -278,22 +282,22 @@ public class Tictactoe_project extends Application implements Runnable{
               Optional<String> playername = textinput.showAndWait();
               if(playername.isPresent()) {
                   p1.shape='x';
-                  p1.playerId=0;
                   p1.mode=0;
                   p1.name="Computer";
                   System.out.println("Player1 name : "+p1.name); 
-                  
+                  myDB.insertPlayer(p1.name, p1.mode, p1.shape);
+                  p1.playerId= myDB.getMaxPlayerId();
+                  myDB.insertGamePlayer(maxGameId, p1.playerId);
                   
                   p2.shape='o';
-                  p2.playerId=1;
                   p2.mode=0;
                   p2.name=playername.get();
                   System.out.println("Player2 name : "+p2.name);
-                  
-                    
+                  myDB.insertPlayer(p2.name, p2.mode, p2.shape);
+                  p2.playerId= myDB.getMaxPlayerId();
+                  myDB.insertGamePlayer(maxGameId,p2.playerId); 
                   stage.setScene(mainScene(stage));
               }
-
                 //System.out.println("Who's gonna move first? (1)Computer (2)User: ");
                 //int choice = b.scan.nextInt();
                 int choice = 2; //User first .. 
@@ -341,6 +345,8 @@ public class Tictactoe_project extends Application implements Runnable{
         twoplayers.setOnAction((ActionEvent event) -> {
             game = new Game();
             game.mode = 1;
+            myDB.insertGame(game.mode);
+            maxGameId=myDB.getMaxGameId();
             if(group.getSelectedToggle() == network) {
                 network_mode=true;
             }
@@ -349,35 +355,42 @@ public class Tictactoe_project extends Application implements Runnable{
             }
             
             // two players locally
-            if(!network_mode){
+            if(!network_mode)
+            {
                 game = new Game();
                 game.mode = 1;
                 Optional<String> playername = same_p1.showAndWait();
                 if(playername.isPresent()) {
                     p1.shape='x';
-                    p1.playerId=1;
                     p1.mode=1;
                     p1.name=playername.get();
                     System.out.println("Player1 name : "+p1.name);
+                    myDB.insertPlayer(p1.name, p1.mode, p1.shape);
+                    p1.playerId= myDB.getMaxPlayerId();
+                    myDB.insertGamePlayer(maxGameId, p1.playerId);
                 }
                 Optional<String> playername2 = same_p2.showAndWait();
                 if(playername2.isPresent()) {
                     p2.shape='o';
-                    p2.playerId=2;
                     p2.mode=1;
                     p2.name=playername2.get();
                     System.out.println("Player2 name : "+p2.name);
+                    myDB.insertPlayer(p2.name, p2.mode, p2.shape);
+                    p2.playerId= myDB.getMaxPlayerId();
+                    myDB.insertGamePlayer(maxGameId, p2.playerId);
                 }
                 
-            }else{
+            }
+            else
+            {
                 // network mode
                 game = new Game();
                 game.mode = 2;
+                myDB.insertGame(game.mode);
+                maxGameId=myDB.getMaxGameId();
                 Optional<String> playername = clientinput.showAndWait();
                 if(playername.isPresent()) {
-                    // run server to listen to clients 
-                  // ServerSide server= new ServerSide();
-                   
+                 // run server to listen to clients 
                    game.mode=2;
                     p1.playerId=1;
                     p1.mode=1;
@@ -394,10 +407,14 @@ public class Tictactoe_project extends Application implements Runnable{
                     char[]chArr=shapeType.get().toCharArray();
                     p1.shape=chArr[0];
                     System.out.println(p1.shape);
+                    myDB.insertPlayer(p1.name, p1.mode, p1.shape);
+                    p1.playerId= myDB.getMaxPlayerId();
+                    myDB.insertGamePlayer(maxGameId, p1.playerId);
+
                 }
                 // open socket and connect it to server
-                th=new Thread(this);
                 try{
+                        th=new Thread(this);
 			s=new Socket(p1.serverIp,5005);
 			dis=new DataInputStream(s.getInputStream());
 			ps=new PrintStream(s.getOutputStream());
@@ -442,10 +459,18 @@ public class Tictactoe_project extends Application implements Runnable{
         Button save= new Button();
         save.setText("Save Game");
         save.setStyle("-fx-background-color: yellow;");
-//        save.setStyle("-fx-color: green;");
   
         save.setOnAction((ActionEvent event) -> {
             System.out.println("Welcome .... ");
+            TextInputDialog textinput=new TextInputDialog();
+            textinput.setTitle("Save Game");
+            textinput.setHeaderText("Please, Enter name for this game to save...:");
+                        Optional<String> result = textinput.showAndWait();
+                        if(result.isPresent()) {
+                  
+                            myDB.updateGame(result.get(),maxGameId);
+                        }
+            
          });
         btns=new ArrayList<>();
         GridPane pane = new GridPane();
@@ -475,7 +500,7 @@ public class Tictactoe_project extends Application implements Runnable{
                  // Network board game is sent to server
                 if(game.mode  == 2 && p1.is_win != 1){
                          
-                         if(p1.shape=='x'){
+                       if(p1.shape=='x'){
                              
                         game.Board[indx_x][indx_y]='x';
                         text="x.png";
@@ -494,14 +519,14 @@ public class Tictactoe_project extends Application implements Runnable{
                     else if(game.mode==0) { // play with computer game
                         //Game.btnClickedRow = indx_x;
                         //Game.btnClickedCol = indx_y;
-                        
-                        //System.out.println("Your move: ");
                         Point userMove = new Point(indx_x, indx_y);               
                         System.out.println("point: "+userMove.toString());
-                
                         boardAI.placeAMove(userMove, 2); //2 for O and O is the user
                         boardAI.displayBoard();
                         
+                        int currentPoss=(indx_x*3)+indx_y;
+                        myDB.insertStep(maxGameId, p2.playerId, currentPoss);
+                       
                         counter++;
 
                         if (!boardAI.isGameOver()) {   
@@ -549,6 +574,8 @@ public class Tictactoe_project extends Application implements Runnable{
                             }
                                 
                             boardAI.placeAMove(boardAI.computersMove, 1);
+                            currentPoss=(boardAI.computersMove.x*3)+boardAI.computersMove.y;
+                            myDB.insertStep(maxGameId, p1.playerId, currentPoss);
                             boardAI.displayBoard();
 
                             counter++;
@@ -568,6 +595,8 @@ public class Tictactoe_project extends Application implements Runnable{
                         text ="x.png";
                         b.setStyle("-fx-background-image: url('"+text+"');");
                         b.setDisable(true);
+                        int currentPoss=(indx_x*3)+indx_y;
+                        myDB.insertStep(maxGameId, p1.playerId, currentPoss);
                         counter++;
                         //Game.btnClickedRow = indx_x;
                         //Game.btnClickedCol = indx_y;
@@ -581,6 +610,8 @@ public class Tictactoe_project extends Application implements Runnable{
                         text="o.png";
                         b.setStyle("-fx-background-image: url('"+text+"');");
                         b.setDisable(true);
+                        int currentPoss=(indx_x*3)+indx_y;
+                        myDB.insertStep(maxGameId, p2.playerId, currentPoss);
                         counter++;
                         //Game.btnClickedRow = indx_x;
                         //Game.btnClickedCol = indx_y;
@@ -829,7 +860,7 @@ class Player{
 
 class Point {
 
-    int x, y;
+    public int x, y;
 
     public Point(int x, int y) {
         this.x = x;
