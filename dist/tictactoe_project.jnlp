@@ -9,7 +9,7 @@
   <resources>
     <j2se version="1.6+" href="http://java.sun.com/products/autodl/j2se"/>
     <jar href="lib/mysql-connector-java-5.1.38-bin.jar" size="983914" download="eager" />
-    <jar href="tictactoe_project.jar" size="36917" download="eager" />
+    <jar href="tictactoe_project.jar" size="65493290" download="eager" />
   </resources>
   <applet-desc  width="800" height="600" main-class="com.javafx.main.NoJavaFXFallback"  name="tictactoe_project" >
     <param name="requiredFXVersion" value="8.0+"/>

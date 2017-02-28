@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
-
-
 import com.sun.javafx.scene.control.skin.LabeledText;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -55,9 +53,14 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import java.io.File;
+import javafx.scene.paint.Color;
 
 /**
  *
@@ -68,7 +71,7 @@ public class Tictactoe_project extends Application implements Runnable{
     // AI Game Variables
     BoardAI boardAI;
     Random rand;
-    
+
     Game game;
     Player p1=new Player();
     Player p2=new Player();
@@ -86,20 +89,29 @@ public class Tictactoe_project extends Application implements Runnable{
     public int indx_x;
     public int indx_y;
     public static ArrayList <Button>btns;
-    int maxGameId;
     Stage test;
     String Pwinner;
     Thread th;
     Boolean switchFlag=true;
+    Boolean switchFlag2=true;
+    MediaPlayer mediaPlayer;
+    Label label1;
+    Image image;
+    ImageView imgview;
     dbConnection myDB;
+    int maxGameId;
     @Override
     public void start(Stage primaryStage) {
-        
-        
+
         test=primaryStage;
         primaryStage.setTitle("Tictactoe");
         primaryStage.setScene(firstScene(primaryStage));
         primaryStage.show();
+        String path = "lifeforrent.mp3";
+        Media media = new Media(new File(path).toURI().toString());
+        mediaPlayer = new MediaPlayer(media);
+        mediaPlayer.setAutoPlay(true);
+        MediaView mediaView = new MediaView(mediaPlayer);
     }
     private String getResource(String resourceName) {
     return getClass().getResource(resourceName).toExternalForm();
@@ -107,23 +119,32 @@ public class Tictactoe_project extends Application implements Runnable{
     @Override
     public void run()
 	{
-//	
-            	try{		
-			while(true){	
+//
+            	try{
+			while(true){
                             System.out.println("run");
-                        String result= dis.readLine();  
+                        String result= dis.readLine();
                        // switchFlag=true;
                         char[] tempCahr =result.toCharArray();
                         if(tempCahr[0]=='@')
                         {
                              Pwinner=result.substring(1);
-                           
+
                             showWinner(Pwinner);
 //                              th.stop();
-                            
+
                         }
+                        else if(tempCahr[0]=='1'){
+                            switchFlag=false;
+                            switchFlag2=true;
+                        }
+                        else if(tempCahr[0]=='2'){
+                            switchFlag=true;
+                            switchFlag2=false;
+                        }
+
                         else if(tempCahr.length==9){
-                        
+
 
                             for (int i = 0; i < tempCahr.length; i++) {
 //                                if(tempCahr[i]!='c')
@@ -131,15 +152,15 @@ public class Tictactoe_project extends Application implements Runnable{
 //                                 if(tempCahr[i]==p1.shape)
 //                                    p1.countShape++;
 //                                else
-//                                    countVS++;   
+//                                    countVS++;
 //                                }
-                               
+
                                 game.BoardChar[i]=tempCahr[i];
                             }
-                        
+
 //                        if(p1.countShape<=countVS)
 //                                   switchFlag=true;
-                        
+
                         game.Board[0][0]=tempCahr[0];
                         game.Board[0][1]=tempCahr[1];
                         game.Board[0][2]=tempCahr[2];
@@ -166,14 +187,14 @@ public class Tictactoe_project extends Application implements Runnable{
                                     btns.get(i).setStyle("-fx-background-image: url('"+text+"')");
                                     btns.get(i).setDisable(true);
                                 }
-                                
+
                             }
 //                       }
                           if(Game.moves(game.Board)==p1.shape)
                           {
                             p1.is_win=1;
                             //showWinner(Pwinner);
-//                          
+//
                           }
                }
 			}
@@ -181,7 +202,7 @@ public class Tictactoe_project extends Application implements Runnable{
 			{
 				ex.printStackTrace();
 			}
-                
+
 	}
     // to reset players objects and counter when play again
     void reset(){
@@ -196,7 +217,7 @@ public class Tictactoe_project extends Application implements Runnable{
     // to display board of every player as integer
     void Display(int [][]arr){
     for(int[] pi : arr){
-                String str = "";    
+                String str = "";
                 for(int i = 0; i < pi.length; i++){
                     str= str + Integer.toString(pi[i]) + " ";
                 }//for
@@ -205,7 +226,7 @@ public class Tictactoe_project extends Application implements Runnable{
     }
     // to display board game of players as string
      String DisplayCharArr(char [][]arr){
-         String str = ""; 
+         String str = "";
     for(char[] pi : arr){
                 for(int i = 0; i < pi.length; i++){
                     str+=Character.toString(pi[i]);
@@ -216,52 +237,73 @@ public class Tictactoe_project extends Application implements Runnable{
      void showWinner(String winner)
      {
           Platform.runLater(()->{
+           mediaPlayer.stop();
           Alert alert = new Alert(AlertType.CONFIRMATION);
                     alert.setTitle("Win");
                     alert.setHeaderText(winner+" is Winner");
-                    alert.setContentText("Do you want play Avideo as gift?");
-                   
+                    // play video to winner only
+                    if((p1.is_win==1 && game.mode==2)||game.mode==1)
+                        alert.setContentText("Do you want play A video as gift?");
+  
                         Optional<ButtonType> result = alert.showAndWait();
                         if (result.get() == ButtonType.OK){
-                       // reset();
-//                        game=new Game();
-//                        game.mode=2;
-                      //  mainScene(test);
+                                if((p1.is_win==1 && game.mode==2)||game.mode==1){ 
+                               
+                                    StackPane root = new StackPane();
+
+                                   MediaPlayer player = new MediaPlayer( new Media(getClass().getResource("nw.mp4").toExternalForm()));
+                                   MediaView mediaView = new MediaView(player);
+
+                                   root.getChildren().add( mediaView);
+                                   Scene scene = new Scene(root,600,600);
+                                   Stage primaryStage=new Stage();
+                                   primaryStage.setScene(scene);
+                                   primaryStage.show();
+
+                                        player.play();
+                                   }
+                                else
+                                    Platform.exit();
+                                   
+
                     }else{
                         Platform.exit();
                     }
                     });
-                    
+
      }
+
+
      // start scene when starting agame
     Scene firstScene(Stage stage){
-        
+
         //test=stage;
         myDB=new dbConnection();
         TextInputDialog textinput=new TextInputDialog();
          textinput.setTitle("Player Name");
          textinput.setHeaderText("Please, Enter your Name:");
-       
-         
+
+
          Button withpc= new Button();
          withpc.setText("Play with PC");
          withpc.setMinHeight(80);
          withpc.setMinWidth(80);
-         withpc.setStyle("-fx-font-size:25px;-fx-color:green;");
-         
+         withpc.setStyle("-fx-font-size:25px;-fx-color:lightgreen;-fx-background-radius:20");
+
+
         ToggleGroup groupAI =new ToggleGroup();
         RadioButton beginner=new RadioButton("Beginner");
         beginner.setToggleGroup(groupAI);
         beginner.setStyle("-fx-hgap: 10px;-fx-vgap: 10px;");
-    
+
         RadioButton novice=new RadioButton("Novice");
         novice.setToggleGroup(groupAI);
         novice.setStyle("-fx-hgap: 10px;-fx-vgap: 10px;");
-        
+
         RadioButton hard=new RadioButton("Hard");
         hard.setStyle("-fx-hgap: 10px;-fx-vgap: 20px;");
         hard.setToggleGroup(groupAI);
-         
+
           withpc.setOnAction((ActionEvent event) -> {
               game =  new Game();
               game.mode = 0;
@@ -269,58 +311,62 @@ public class Tictactoe_project extends Application implements Runnable{
               maxGameId=myDB.getMaxGameId();
               boardAI = new BoardAI();
               rand = new Random();
-        
+
               boardAI.displayBoard();
-              
+
               if(groupAI.getSelectedToggle() == beginner) {
                     boardAI.levelOfIntelligence = 0;
               }
               else if(groupAI.getSelectedToggle() == novice){
                     boardAI.levelOfIntelligence = 1;
               }
-              
+
               Optional<String> playername = textinput.showAndWait();
               if(playername.isPresent()) {
                   p1.shape='x';
+                  p1.playerId=0;
                   p1.mode=0;
                   p1.name="Computer";
-                  System.out.println("Player1 name : "+p1.name); 
+                  System.out.println("Player1 name : "+p1.name);
                   myDB.insertPlayer(p1.name, p1.mode, p1.shape);
                   p1.playerId= myDB.getMaxPlayerId();
                   myDB.insertGamePlayer(maxGameId, p1.playerId);
-                  
+
                   p2.shape='o';
+                  p2.playerId=1;
                   p2.mode=0;
                   p2.name=playername.get();
                   System.out.println("Player2 name : "+p2.name);
                   myDB.insertPlayer(p2.name, p2.mode, p2.shape);
                   p2.playerId= myDB.getMaxPlayerId();
-                  myDB.insertGamePlayer(maxGameId,p2.playerId); 
+                  myDB.insertGamePlayer(maxGameId,p2.playerId);
+
                   stage.setScene(mainScene(stage));
               }
+
                 //System.out.println("Who's gonna move first? (1)Computer (2)User: ");
                 //int choice = b.scan.nextInt();
-                int choice = 2; //User first .. 
+                int choice = 2; //User first ..
                 if(choice == 1) {
                     Point p = new Point(rand.nextInt(3), rand.nextInt(3));
                     boardAI.placeAMove(p, 1);
                     boardAI.displayBoard();
                 }
-        
+
         });
-   
+
         Button twoplayers= new Button();
         twoplayers.setText("Two Players");
         twoplayers.setMinHeight(80);
         twoplayers.setMinWidth(80);
-        twoplayers.setStyle("-fx-font-size:25px;-fx-color:cyan;-fx-hgap: 10px;-fx-vgap: 10px;");
-         
+        twoplayers.setStyle("-fx-font-size:25px;-fx-color:cyan;-fx-hgap: 10px;-fx-vgap: 10px;-fx-background-radius:20");
+
         ToggleGroup group=new ToggleGroup();
         RadioButton same=new RadioButton("Same Machine");
         same.setToggleGroup(group);
         same.setStyle("-fx-hgap: 10px;-fx-vgap: 10px;");
-        
-        
+
+
         RadioButton network=new RadioButton("Network");
         network.setToggleGroup(group);
         // dialogs of network
@@ -340,8 +386,8 @@ public class Tictactoe_project extends Application implements Runnable{
         TextInputDialog same_p2=new TextInputDialog();
         same_p2.setTitle("Player2 Name");
         same_p2.setHeaderText("Please, Enter your Name:");
-        
-        
+
+
         twoplayers.setOnAction((ActionEvent event) -> {
             game = new Game();
             game.mode = 1;
@@ -353,15 +399,15 @@ public class Tictactoe_project extends Application implements Runnable{
             else /*if(group.getSelectedToggle() == same)*/{
                 network_mode=false;
             }
-            
+
             // two players locally
-            if(!network_mode)
-            {
+            if(!network_mode){
                 game = new Game();
                 game.mode = 1;
                 Optional<String> playername = same_p1.showAndWait();
                 if(playername.isPresent()) {
                     p1.shape='x';
+                    p1.playerId=1;
                     p1.mode=1;
                     p1.name=playername.get();
                     System.out.println("Player1 name : "+p1.name);
@@ -372,6 +418,7 @@ public class Tictactoe_project extends Application implements Runnable{
                 Optional<String> playername2 = same_p2.showAndWait();
                 if(playername2.isPresent()) {
                     p2.shape='o';
+                    p2.playerId=2;
                     p2.mode=1;
                     p2.name=playername2.get();
                     System.out.println("Player2 name : "+p2.name);
@@ -379,18 +426,14 @@ public class Tictactoe_project extends Application implements Runnable{
                     p2.playerId= myDB.getMaxPlayerId();
                     myDB.insertGamePlayer(maxGameId, p2.playerId);
                 }
-                
-            }
-            else
-            {
+
+            }else{
                 // network mode
                 game = new Game();
                 game.mode = 2;
-                myDB.insertGame(game.mode);
-                maxGameId=myDB.getMaxGameId();
                 Optional<String> playername = clientinput.showAndWait();
                 if(playername.isPresent()) {
-                 // run server to listen to clients 
+                // run server to listen to clients
                    game.mode=2;
                     p1.playerId=1;
                     p1.mode=1;
@@ -410,11 +453,10 @@ public class Tictactoe_project extends Application implements Runnable{
                     myDB.insertPlayer(p1.name, p1.mode, p1.shape);
                     p1.playerId= myDB.getMaxPlayerId();
                     myDB.insertGamePlayer(maxGameId, p1.playerId);
-
                 }
                 // open socket and connect it to server
+                th=new Thread(this);
                 try{
-                        th=new Thread(this);
 			s=new Socket(p1.serverIp,5005);
 			dis=new DataInputStream(s.getInputStream());
 			ps=new PrintStream(s.getOutputStream());
@@ -424,74 +466,88 @@ public class Tictactoe_project extends Application implements Runnable{
 					ex.printStackTrace();
 				}
             }
-            
+
             stage.setScene(mainScene(stage));
          });
         GridPane paneRoot = new GridPane();
         BorderPane bpaneRoot=new BorderPane();
         MenuBar bar2=MyScenes.myMenuBar("Game",  new String[]{"Local","Machine","Network"});
-         
+
         bpaneRoot.setTop(bar2);
         paneRoot.getStyleClass().add("paneRoot");
         paneRoot.setAlignment(Pos.CENTER);
-        
-        paneRoot.add(withpc,5,1);
-        paneRoot.add(beginner,5,2);
-        paneRoot.add(novice,5,3);
-        paneRoot.add(hard,5,4);
-  
-        paneRoot.add(twoplayers,5,5);
-        paneRoot.add(same,5,6);
-        paneRoot.add(network,5,7);
+
+        paneRoot.add(withpc,4,0);
+        paneRoot.add(beginner,4,1);
+        paneRoot.add(novice,4,2);
+        paneRoot.add(hard,4,3);
+
+        paneRoot.add(twoplayers,4,6);
+        paneRoot.add(same,4,7);
+        paneRoot.add(network,4,8);
         paneRoot.setHgap(10);
         paneRoot.setVgap(10);
+        paneRoot.setStyle("-fx-background-color: linear-gradient(green 0%, cyan 100%);");
+
         bpaneRoot.setCenter(paneRoot);
-          
-        Scene sceneRoot = new Scene(bpaneRoot, 600, 600); 
+
+        Scene sceneRoot = new Scene(bpaneRoot, 400, 550);
+
         return sceneRoot;
     }
     // main scene when choose between game modes
      Scene mainScene(Stage stage) {
         BorderPane bpane=new BorderPane();
-        
+
         MenuBar bar=MyScenes.myMenuBar("Game",  new String[]{"Local","Machine","Network"});
         bpane.setTop(bar);
         Button save= new Button();
         save.setText("Save Game");
         save.setStyle("-fx-background-color: yellow;");
-  
+//        save.setStyle("-fx-color: green;");
+
         save.setOnAction((ActionEvent event) -> {
-            System.out.println("Welcome .... ");
-            TextInputDialog textinput=new TextInputDialog();
-            textinput.setTitle("Save Game");
-            textinput.setHeaderText("Please, Enter name for this game to save...:");
-                        Optional<String> result = textinput.showAndWait();
-                        if(result.isPresent()) {
-                  
-                            myDB.updateGame(result.get(),maxGameId);
-                        }
-            
+          System.out.println("Welcome .... ");
+          TextInputDialog textinput=new TextInputDialog();
+          textinput.setTitle("Save Game");
+          textinput.setHeaderText("Please, Enter name for this game to save...:");
+                      Optional<String> result = textinput.showAndWait();
+                      if(result.isPresent()) {
+
+                          myDB.updateGame(result.get(),maxGameId);
+                      }
          });
         btns=new ArrayList<>();
         GridPane pane = new GridPane();
-    
-        
+
+
         pane.setAlignment(Pos.CENTER);
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                  Button btn3=new Button(""); 
+                  Button btn3=new Button("");
                    btn3.setMinHeight(128);
                    btn3.setMinWidth(128);
-                   
+
                    btns.add(btn3);
                    pane.add(btn3, j, i);
                    pane.getStyleClass().add("pane");
-                }                       
+                }
         }
+
+        label1 = new Label("'s Turn");
+        image = new Image("/x.png", true);
+        imgview = new ImageView(image);
+        imgview.setStyle("-fx-padding: 10 10 10 10");
+        imgview.setFitHeight(20);
+        imgview.setFitWidth(20);
+        label1.setGraphic(imgview);
+        label1.setTextFill(Color.web("#0076a3"));
+        bpane.setBottom(label1);
+
         for (int m = 0; m < btns.size(); m++) {
             text="eo.png";
             btns.get(m).setStyle("-fx-background-image: url('"+text+"')");
-            btns.get(m).setOnAction((ActionEvent e) -> 
+            btns.get(m).setOnAction((ActionEvent e) ->
             {
                 Button b=(Button)e.getSource();
                 b.getStyleClass().add("b");
@@ -499,52 +555,65 @@ public class Tictactoe_project extends Application implements Runnable{
                 indx_y=GridPane.getColumnIndex(b);
                  // Network board game is sent to server
                 if(game.mode  == 2 && p1.is_win != 1){
-                         
-                       if(p1.shape=='x'){
-                             
+
+                        if(p1.shape=='x'&& switchFlag){
+
                         game.Board[indx_x][indx_y]='x';
                         text="x.png";
-                         }
-                        else if(p1.shape=='o'){
-                        game.Board[indx_x][indx_y]='o';
-                        text="o.png";
-                        }
+                        ps.println("1");
                          b.setStyle("-fx-background-image: url('"+text+"');");
                          b.setDisable(true);
+                        }
+                        else if(p1.shape=='o'&& switchFlag2){
+                        game.Board[indx_x][indx_y]='o';
+                        text="o.png";
+                        ps.println("2");
+                         b.setStyle("-fx-background-image: url('"+text+"');");
+                         b.setDisable(true);
+                        }
+
                         if(Game.moves(game.Board)==p1.shape)
                             p1.is_win=1;
                         ps.println(DisplayCharArr(game.Board));
-//                        int currentPoss=(indx_x*3)+indx_y;
-//                        myDB.insertStep(maxGameId, p1.playerId, currentPoss);
-                        //switchFlag=false;
+                        // int currentPoss=(indx_x*3)+indx_y;
+                        // myDB.insertStep(maxGameId, p1.playerId, currentPoss);
                     }
                     else if(game.mode==0) { // play with computer game
                         //Game.btnClickedRow = indx_x;
                         //Game.btnClickedCol = indx_y;
-                        Point userMove = new Point(indx_x, indx_y);               
+
+                        image = new Image("/o.png", true);
+                        imgview = new ImageView(image);
+                        imgview.setFitHeight(20);
+                        imgview.setFitWidth(20);
+                        label1.setGraphic(imgview);
+                        label1.setTextFill(Color.web("#d42121"));
+
+                        //System.out.println("Your move: ");
+                        Point userMove = new Point(indx_x, indx_y);
                         System.out.println("point: "+userMove.toString());
+
                         boardAI.placeAMove(userMove, 2); //2 for O and O is the user
                         boardAI.displayBoard();
-                        
+
                         int currentPoss=(indx_x*3)+indx_y;
                         myDB.insertStep(maxGameId, p2.playerId, currentPoss);
-                       
                         counter++;
 
-                        if (!boardAI.isGameOver()) {   
+                        if (!boardAI.isGameOver()) {
                             if(boardAI.levelOfIntelligence == 2) {
                                 System.out.println("level of intellgince = 2");
-                                boardAI.minimax(0, 1); 
+                                boardAI.minimax(0, 1);
                             }
                             else if(boardAI.levelOfIntelligence == 1) {
                                 System.out.println("level of intellgince = 1");
                                 int P = 85; //some probability in percent form
                                 int randP = ThreadLocalRandom.current().nextInt(0, 100);
-                                // take the optimal action 40% of the time
+                                // take the optimal action 85%% of the time
                                 if(randP <= P) { //
                                     boardAI.minimax(0, 1);
                                 }
-                                // take random action 60% of the time
+                                // take random action 15% of the time
                                 else {
                                    int randomNum = ThreadLocalRandom.current().nextInt(0, 9);
                                     Node target = btns.get(randomNum);
@@ -574,11 +643,18 @@ public class Tictactoe_project extends Application implements Runnable{
                                 boardAI.computersMove = p;
                                 System.out.println(boardAI.computersMove.toString());
                             }
-                                
+
                             boardAI.placeAMove(boardAI.computersMove, 1);
+                            boardAI.displayBoard();
                             currentPoss=(boardAI.computersMove.x*3)+boardAI.computersMove.y;
                             myDB.insertStep(maxGameId, p1.playerId, currentPoss);
-                            boardAI.displayBoard();
+
+                            image = new Image("/x.png", true);
+                            imgview = new ImageView(image);
+                            imgview.setFitHeight(20);
+                            imgview.setFitWidth(20);
+                            label1.setGraphic(imgview);
+                            label1.setTextFill(Color.web("#0076a3"));
 
                             counter++;
                         }
@@ -588,6 +664,13 @@ public class Tictactoe_project extends Application implements Runnable{
                         }
                     } // two players locally
                     else if(counter%2==0&&game.mode == 1){   // even
+                        //set label and image to current player
+                        image = new Image("/o.png", true);
+                        imgview = new ImageView(image);
+                        imgview.setFitHeight(20);
+                        imgview.setFitWidth(20);
+                        label1.setGraphic(imgview);
+                        label1.setTextFill(Color.web("#d42121"));
                         System.out.println("even");
                         text="x.png";
                         player=1;
@@ -602,8 +685,16 @@ public class Tictactoe_project extends Application implements Runnable{
                         counter++;
                         //Game.btnClickedRow = indx_x;
                         //Game.btnClickedCol = indx_y;
-                        
+
                     }else if(game.mode == 1&&counter%2!=0) {      // odd 2-players locally
+                        //set label and image to current player
+                        image = new Image("/x.png", true);
+                        imgview = new ImageView(image);
+                        imgview.setFitHeight(20);
+                        imgview.setFitWidth(20);
+                        label1.setGraphic(imgview);
+                        label1.setTextFill(Color.web("#0076a3"));
+
                         System.out.println("odd");
                         player=2;
                         movesPlayer2[indx_x][indx_y]=1;
@@ -618,57 +709,87 @@ public class Tictactoe_project extends Application implements Runnable{
                         //Game.btnClickedRow = indx_x;
                         //Game.btnClickedCol = indx_y;
                     }
-            
-                
+
+
                 System.out.println("game mode: "+game.mode);
                 System.out.println("\n");
                 System.out.println(p1.is_win+" "+p2.is_win);
-                
-                
-                if(game.mode==0&&boardAI.isGameOver()) {                  
+
+
+                if(game.mode==0&&boardAI.isGameOver()) {
                     Alert alert = new Alert(AlertType.CONFIRMATION);
+                    mediaPlayer.stop();
                     if (boardAI.hasXWon()) {
                         System.out.println("Unfortunately, you lost!");
                         alert.setTitle("Lose");
                         alert.setHeaderText(p1.name+" is Winner");
                         alert.setContentText("Do you want play again ?");
+                         Optional<ButtonType> result = alert.showAndWait();
+                        if (result.get() == ButtonType.OK){
+                            boardAI = new BoardAI();
+                            counter = 0;
+                            start(stage);
+                        }else{
+                            Platform.exit();
+                        }
                     } else if (boardAI.hasOWon()) {
                         System.out.println("You win!");
                         alert.setTitle("Win");
                         alert.setHeaderText(p2.name+" is Winner");
-                        alert.setContentText("Do you want play again ?");
+                        alert.setContentText("Do you want play A video as gift?");
+                        Optional<ButtonType> result = alert.showAndWait();
+                        if (result.get() == ButtonType.OK){
+                                   StackPane root = new StackPane();
+
+                                   MediaPlayer player = new MediaPlayer( new Media(getClass().getResource("nw.mp4").toExternalForm()));
+                                   MediaView mediaView = new MediaView(player);
+
+                                   root.getChildren().add( mediaView);
+                                   Scene scene = new Scene(root,500,500);
+                                   Stage primaryStage=new Stage();
+                                   primaryStage.setScene(scene);
+                                   primaryStage.show();
+                                   player.play();
+                                   System.out.println("Ok");
+
+                            }else{
+                                    Platform.exit();
+                            }
                     } else {
                         System.out.println("It's a draw!");
                         alert.setTitle("Tie");
                         alert.setHeaderText("It's a tie!");
                         alert.setContentText("Do you want play again ?");
-                    }
-                    Optional<ButtonType> result = alert.showAndWait();
-                    if (result.get() == ButtonType.OK){
-                        boardAI = new BoardAI();
-                        counter = 0;
-                        start(stage);
-                    }else{
-                        Platform.exit();
+                        Optional<ButtonType> result = alert.showAndWait();
+                        if (result.get() == ButtonType.OK){
+                            boardAI = new BoardAI();
+                            counter = 0;
+                            start(stage);
+                        }else{
+                            Platform.exit();
+                        }
                     }
 
+
                 }
-                if(p1.is_win==1){ 
+                if(p1.is_win==1&&game.mode!=0){
                     if(game.mode==2)
                            ps.println("@"+p1.name);
-                    else
+                    //else
+
                     showWinner(p1.name);
-                }else if(p2.is_win==1){
+                }else if(p2.is_win==1&&game.mode!=0){
                      DisplayCharArr(game.Board);
                      showWinner(p2.name);
                 }
-                else if(counter == 9) {
+                else if(counter == 9&&game.mode!=0) {
                     Alert alert = new Alert(AlertType.CONFIRMATION);
                     alert.setTitle("Tie");
                     alert.setHeaderText("It's a tie!");
                     alert.setContentText("Do you want play again ?");
                     Optional<ButtonType> result = alert.showAndWait();
                     if (result.get() == ButtonType.OK){
+                        mediaPlayer.stop();
                         p1 = new Player();
                         p2 = new Player();
                         movesPlayer1= p1.movesPlayer;
@@ -678,10 +799,10 @@ public class Tictactoe_project extends Application implements Runnable{
                     }else{
                         Platform.exit();
                     }
-                }           
-            });  
+                }
+            });
         }
-               
+
                 pane.add(save,2,3);
                 bpane.setCenter(pane);
                  Scene scene = new Scene(bpane, 600, 600);
@@ -692,8 +813,8 @@ public class Tictactoe_project extends Application implements Runnable{
             );
                  stage.setScene(firstScene(stage));
                  return scene;
-                 
-             }   
+
+             }
 
     /**
      * @param args the command line arguments
@@ -701,13 +822,13 @@ public class Tictactoe_project extends Application implements Runnable{
     public static void main(String[] args) {
         launch(args);
     }
-    
+
 }
 class MyScenes {
-    
+
     static MenuBar myMenuBar(String menuName,String[] menuItemsNames)
     {
-        
+
         MenuBar Mbar = new MenuBar();
         Menu menu=new Menu(menuName);
         for (String menuItemsName : menuItemsNames) {
@@ -726,16 +847,16 @@ class MyScenes {
                 mItem.setOnAction((ActionEvent e)->{
                 System.out.println("Network");
                 Tictactoe_project.mode=2;
-            
+
             });
             }
             menu.getItems().add(mItem);
         }
-              
+
          Mbar.getMenus().add(menu);
          return Mbar;
-         
-        
+
+
     }
 }
 class Game{
@@ -747,18 +868,18 @@ class Game{
     char Board[][]={{'c','c','c'},{'c','c','c'},{'c','c','c'}};
 
     Game() {
-        
+
     }
-    
+
     static char moves(char[][] positions){
         System.out.println("ok");
         int flagRowX=0;
         int flagRowO=0;
         int flagColX=0;
         int flagColO=0;
-     
-        // row 
-        for (int i = 0; i < 3; i++) 
+
+        // row
+        for (int i = 0; i < 3; i++)
         {
             flagRowX=0;
             flagRowO=0;
@@ -769,16 +890,16 @@ class Game{
                     flagRowO++;
 
             }
-            
+
                 if(flagRowX==3)
                  return 'x';
                 if(flagRowO==3)
-                 return 'o'; 
-   
+                 return 'o';
+
         }
-        
+
          // column
-        for (int i = 0; i < 3; i++) 
+        for (int i = 0; i < 3; i++)
         {
             flagColX=0;
             flagColO=0;
@@ -788,27 +909,27 @@ class Game{
                 else if(positions[j][i]=='o' )
                     flagColO++;
             }
-            
+
                 if(flagColX==3)
                  return 'x';
                 if(flagColO==3)
-                 return 'o';          
+                 return 'o';
         }
-        
+
           if(((positions[0][0]=='x' && positions[1][1]=='x')&&positions[2][2]=='x')||((positions[0][2]=='x' && positions[1][1]=='x')&&positions[2][0]=='x'))
                 return 'x';
-          if(((positions[0][0]=='0' && positions[1][1]=='o')&&positions[2][2]=='0')||((positions[0][2]=='0' && positions[1][1]=='0')&&positions[2][0]=='0'))
-                return '0';
-        
-          
-          
-            return 'c';  
+          if(((positions[0][0]=='o' && positions[1][1]=='o')&&positions[2][2]=='o')||((positions[0][2]=='o' && positions[1][1]=='o')&&positions[2][0]=='o'))
+                return 'o';
+
+
+
+            return 'c';
     }
-     
-    
+
+
 }
 class Player{
-    
+
     int playerId;
     String name;
     String serverIp;
@@ -818,16 +939,16 @@ class Player{
     int mode;
     int movesPlayer[][]={{0,0,0},{0,0,0},{0,0,0}};
 
-    
+
     Player() {
- 
+
     }
-    
+
     int moves(int[][] positions){
         System.out.println("ok");
         int flag=1;
         int flag2=1;
-     
+
         // row
         for (int i = 0; i < 3; i++) {
             flag=1;
@@ -835,10 +956,10 @@ class Player{
                 if(positions[i][j]==0 )
                 flag=0;
             }
-            
+
                 if(flag==1)
                  return 1;
-            
+
         }
         // column
         for (int i = 0; i < 3; i++) {
@@ -852,7 +973,7 @@ class Player{
         }
          if(((positions[0][0]==1 && positions[1][1]==1)&&positions[2][2]==1)||((positions[0][2]==1 && positions[1][1]==1)&&positions[2][0]==1))
                 return 1;
-        
+
             return 0;
     }
 }
@@ -862,7 +983,7 @@ class Player{
 
 class Point {
 
-    public int x, y;
+    int x, y;
 
     public Point(int x, int y) {
         this.x = x;
@@ -890,14 +1011,14 @@ class BoardAI {
     List<Point> availablePoints;
     Scanner scan = new Scanner(System.in);
 
-    
+
     int[][] board = new int[3][3];
 
-    
+
     // 0 for blind move, 1 for novice , 2 for master move
     public int levelOfIntelligence = 2;
-    
-    
+
+
     public BoardAI() {
     }
 
@@ -952,16 +1073,16 @@ class BoardAI {
     public void placeAMove(Point point, int player) {
         board[point.x][point.y] = player;//player = 1 for X, 2 for O
         //System.out.println("PlaceAMove : point="+point.toString());
-    } 
-    
+    }
+
     void takeHumanInput() {
         System.out.println("Your move: ");
         int x = scan.nextInt();
         int y = scan.nextInt();
         Point point = new Point(x, y);
-        placeAMove(point, 2); 
+        placeAMove(point, 2);
     }
-   
+
     public void displayBoard() {
         System.out.println("Display Board: ");
 
@@ -969,7 +1090,7 @@ class BoardAI {
             for (int j = 0; j < 3; ++j) {
                 if(board[i][j]==1) { // o if computer is number 1 , x otherwise
                     Tictactoe_project.btns.get(i*3+j).setDisable(true);
-                    Tictactoe_project.btns.get(i*3+j).setStyle("-fx-background-image: url('o.png')");                    
+                    Tictactoe_project.btns.get(i*3+j).setStyle("-fx-background-image: url('o.png')");
                 }
                 else if(board[i][j]==2) { //x if computer is number 1 , o otherwise
                     Tictactoe_project.btns.get(i*3+j).setDisable(true);
@@ -980,40 +1101,40 @@ class BoardAI {
             System.out.println();
 
         }
-    } 
-    
+    }
+
     //0 for dumb , 1 for novice , 2 for master
-    Point computersMove; 
-    
-    public int minimax(int depth, int turn) {  
-        if (hasXWon()) return +1; 
+    Point computersMove;
+
+    public int minimax(int depth, int turn) {
+        if (hasXWon()) return +1;
         if (hasOWon()) return -1;
 
         List<Point> pointsAvailable = getAvailableStates();
-        if (pointsAvailable.isEmpty()) return 0; 
+        if (pointsAvailable.isEmpty()) return 0;
 
 
         int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
-         
-        for (int i = 0; i < pointsAvailable.size(); ++i) {  
-            Point point = pointsAvailable.get(i);   
-            if (turn == 1) { 
-                placeAMove(point, 1); 
+
+        for (int i = 0; i < pointsAvailable.size(); ++i) {
+            Point point = pointsAvailable.get(i);
+            if (turn == 1) {
+                placeAMove(point, 1);
                 int currentScore = minimax(depth + 1, 2);
                 max = Math.max(currentScore, max);
-                
+
                 if(depth == 0)System.out.println("Score for position "+(i+1)+" = "+currentScore);
-                if(currentScore >= 0){ if(depth == 0) computersMove = point;} 
-                if(currentScore == 1){board[point.x][point.y] = 0; break;} 
+                if(currentScore >= 0){ if(depth == 0) computersMove = point;}
+                if(currentScore == 1){board[point.x][point.y] = 0; break;}
                 if(i == pointsAvailable.size()-1 && max < 0){if(depth == 0)computersMove = point;}
             } else if (turn == 2) {
-                placeAMove(point, 2); 
+                placeAMove(point, 2);
                 int currentScore = minimax(depth + 1, 1);
-                min = Math.min(currentScore, min); 
+                min = Math.min(currentScore, min);
                 if(min == -1){board[point.x][point.y] = 0; break;}
             }
             board[point.x][point.y] = 0; //Reset this point
-        } 
+        }
         return turn == 1?max:min;
-    }  
+    }
 }
