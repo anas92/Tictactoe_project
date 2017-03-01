@@ -532,12 +532,13 @@ void Display(int [][]arr){
 
         	load.setOnAction((ActionEvent event) -> {
         		System.out.println("Loaad Game...");
+			TextInputDialog textinput=new TextInputDialog();
         		textinput.setHeaderText("Please, Enter name of the game to load...:");
         		Optional<String> result = textinput.showAndWait();
         		if(result.isPresent()) {
         			myBoard = myDB.selectGameByName(result.get());
         			int i =  0;
-        			for (Map.Entry<Integer,String> entry : myData.entrySet()) {
+        			for (Map.Entry<Integer,String> entry : myBoard.entrySet()) {
         				Integer key = entry.getKey();
         				String value = entry.getValue();
         				btns.get(key).setDisable(true);
